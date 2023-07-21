@@ -1,4 +1,4 @@
-name: Get quotes
+name: 📈 Update Quotes
 
 on:
   workflow_dispatch:
