@@ -1,5 +1,4 @@
 name: 📈 Update Quotes
-name: 📈 Update Quotes
 on:
   workflow_dispatch:
   schedule:

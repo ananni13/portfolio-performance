@@ -1,11 +1,6 @@
 name: 🚀 Deploy
-name: 🚀 Deploy
 on:
   workflow_dispatch:
-  workflow_run:
-    workflows: ["📈 Update Quotes"]
-    types:
-      - completed
   workflow_run:
     workflows: ["📈 Update Quotes"]
     types:
