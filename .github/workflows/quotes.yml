@@ -1,5 +1,4 @@
 name: 📈 Update Quotes
-
 on:
   workflow_dispatch:
   schedule:
@@ -8,7 +7,8 @@ on:
 permissions: write-all
 
 jobs:
-  get-quotes:
+  update-quotes:
+    name: 📈 Update Quotes
     runs-on: ubuntu-latest
 
     steps:
