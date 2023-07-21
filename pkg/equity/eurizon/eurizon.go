@@ -45,7 +45,7 @@ func (*Eurizon) LoadQuotes() ([]security.Quote, error) {
 		return nil, fmt.Errorf("error getting quotes: %w", err)
 	}
 	if res.StatusCode >= 400 {
-		return nil, fmt.Errorf("error from request", "status_code", res.StatusCode)
+		return nil, fmt.Errorf("error from request: status_code %d", res.StatusCode)
 	}
 
 	b, err := io.ReadAll(res.Body)
