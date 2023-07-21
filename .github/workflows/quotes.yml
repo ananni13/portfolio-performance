@@ -23,6 +23,8 @@ jobs:
 
       - name: ⬆️ Push all changes
         uses: stefanzweifel/git-auto-commit-action@v4
+        env:
+          GITHUB_TOKEN: ${{ secrets.MY_GITHUB_TOKEN }}
         with:
           add_options: "--all"
           commit_message: Automated report
