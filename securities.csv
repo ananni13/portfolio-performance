@@ -28,7 +28,10 @@
 
 # Fon.Te.
 
-"FP-FonTe-Dinamico","Fondo Pensione Fon.Te. - Comparto Dinamico","fonte"
+"FP-FonTe-Conservativo.garantito","Fondo Pensione Fon.Te. - Comparto Conservativo","fonte"
+"FP-FonTe-Sviluppo.bilanciato","Fondo Pensione Fon.Te. - Comparto Sviluppo","fonte"
+"FP-FonTe-Crescita.crescita","Fondo Pensione Fon.Te. - Comparto Crescita","fonte"
+"FP-FonTe-Dinamico.dinamico","Fondo Pensione Fon.Te. - Comparto Dinamico","fonte"
 
 
 # Secondapensione
