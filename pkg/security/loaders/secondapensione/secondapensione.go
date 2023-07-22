@@ -5,6 +5,7 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/charmbracelet/log"
 	"github.com/enrichman/portfolio-perfomance/pkg/security"
 	"github.com/gocolly/colly/v2"
 )
@@ -50,12 +51,14 @@ func (s *SecondaPensione) LoadQuotes() ([]security.Quote, error) {
 
 			date, err := time.Parse("02/01/2006", dateString)
 			if err != nil {
-				panic(err)
+				log.Warnf("Error parsing date: %s", err)
+				return
 			}
 
 			closeQuote, err := strconv.ParseFloat(valueString, 32)
 			if err != nil {
-				panic(err)
+				log.Warnf("Error parsing quote: %s", err)
+				return
 			}
 
 			quotes = append(quotes, security.Quote{

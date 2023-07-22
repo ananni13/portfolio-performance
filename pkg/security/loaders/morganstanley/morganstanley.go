@@ -138,12 +138,14 @@ func (m *MorganStanleyQuoteLoader) LoadQuotes() ([]security.Quote, error) {
 
 		date, err := time.Parse("01/02/2006", dateString)
 		if err != nil {
-			panic(err)
+			log.Warnf("Error parsing date: %s", err)
+			continue
 		}
 
 		closeQuote, err := strconv.ParseFloat(valueString, 32)
 		if err != nil {
-			panic(err)
+			log.Warnf("Error parsing quote: %s", err)
+			continue
 		}
 
 		quotes = append(quotes, security.Quote{
