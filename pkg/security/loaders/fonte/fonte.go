@@ -44,6 +44,10 @@ func (f *FonteQuoteLoader) ISIN() string {
 	return f.isin
 }
 
+func (f *FonteQuoteLoader) UrlName() string {
+	return f.urlName
+}
+
 func (f *FonteQuoteLoader) LoadQuotes() ([]security.Quote, error) {
 	c := colly.NewCollector()
 
