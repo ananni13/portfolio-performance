@@ -25,12 +25,11 @@ type MorganStanleyQuoteLoader struct {
 	shareClassId string
 }
 
-func New(name, isin string) *MorganStanleyQuoteLoader {
+func New(name, isin string) (*MorganStanleyQuoteLoader, error) {
 	isinIdShareId := strings.Split(isin, ".")
 
 	if len(isinIdShareId) != 3 {
-		log.Warnf("Wrong ISIN format for MorganStanleyQuoteLoader: \"%s\" - should be \"ISIN.fundId.shareClassId\"", isin)
-		return nil
+		return nil, fmt.Errorf("Wrong ISIN format for MorganStanleyQuoteLoader: \"%s\" - should be \"ISIN.fundId.shareClassId\"", isin)
 	}
 
 	return &MorganStanleyQuoteLoader{
@@ -38,7 +37,7 @@ func New(name, isin string) *MorganStanleyQuoteLoader {
 		isin:         isinIdShareId[0],
 		fundId:       isinIdShareId[1],
 		shareClassId: isinIdShareId[2],
-	}
+	}, nil
 }
 
 type HistoricalNav struct {

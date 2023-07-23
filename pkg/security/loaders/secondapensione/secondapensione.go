@@ -19,11 +19,11 @@ type SecondaPensione struct {
 	isin string
 }
 
-func New(name, isin string) *SecondaPensione {
+func New(name, isin string) (*SecondaPensione, error) {
 	return &SecondaPensione{
 		name: name,
 		isin: isin,
-	}
+	}, nil
 }
 
 func (e *SecondaPensione) Name() string {

@@ -6,7 +6,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/charmbracelet/log"
 	"github.com/enrichman/portfolio-perfomance/pkg/security"
 	"github.com/gocolly/colly/v2"
 )
@@ -21,19 +20,18 @@ type FonteQuoteLoader struct {
 	urlName string
 }
 
-func New(name, isin string) *FonteQuoteLoader {
+func New(name, isin string) (*FonteQuoteLoader, error) {
 	isinUrlName := strings.Split(isin, ".")
 
 	if len(isinUrlName) != 2 {
-		log.Warnf("Wrong ISIN format for FonteQuoteLoader: \"%s\" - should be \"ISIN.urlName\"", isin)
-		return nil
+		return nil, fmt.Errorf("Wrong ISIN format for FonteQuoteLoader: \"%s\" - should be \"ISIN.urlName\"", isin)
 	}
 
 	return &FonteQuoteLoader{
 		name:    name,
 		isin:    isinUrlName[0],
 		urlName: isinUrlName[1],
-	}
+	}, nil
 }
 
 func (f *FonteQuoteLoader) Name() string {

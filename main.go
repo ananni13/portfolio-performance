@@ -156,22 +156,9 @@ func loadSecuritiesFromCSV(path string) error {
 		name := line[1]
 		loader := line[2]
 
-		var quoteLoader security.QuoteLoader
-		switch loader {
-		case "borsaitaliana":
-			quoteLoader = borsaitaliana.New(name, isin)
-		case "fonte":
-			quoteLoader = fonte.New(name, isin)
-		case "secondapensione":
-			quoteLoader = secondapensione.New(name, isin)
-		case "fondidoc":
-			quoteLoader = fondidoc.New(name, isin)
-		case "morganstanley":
-			quoteLoader = morganstanley.New(name, isin)
-		}
-
-		if quoteLoader == nil {
-			log.Warnf("quoteLoader [%s] not found for ISIN %s (%s)", loader, isin, name)
+		quoteLoader, err := getQuoteLoader(loader, name, isin)
+		if err != nil {
+			log.Warnf("Error creating quoteLoader [%s] for ISIN %s (%s): %s", loader, isin, name, err)
 			continue
 		}
 
@@ -179,4 +166,20 @@ func loadSecuritiesFromCSV(path string) error {
 	}
 
 	return nil
+}
+
+func getQuoteLoader(loader, name, isin string) (security.QuoteLoader, error) {
+	switch loader {
+	case "borsaitaliana":
+		return borsaitaliana.New(name, isin)
+	case "fonte":
+		return fonte.New(name, isin)
+	case "secondapensione":
+		return secondapensione.New(name, isin)
+	case "fondidoc":
+		return fondidoc.New(name, isin)
+	case "morganstanley":
+		return morganstanley.New(name, isin)
+	}
+	return nil, fmt.Errorf("quoteLoader [%s] not found", loader)
 }

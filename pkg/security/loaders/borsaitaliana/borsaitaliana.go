@@ -18,7 +18,7 @@ type BorsaItalianaQuoteLoader struct {
 	market string
 }
 
-func New(name, isin string) *BorsaItalianaQuoteLoader {
+func New(name, isin string) (*BorsaItalianaQuoteLoader, error) {
 	isinMarket := strings.Split(isin, ".")
 
 	var market string
@@ -30,7 +30,7 @@ func New(name, isin string) *BorsaItalianaQuoteLoader {
 		name:   name,
 		isin:   isinMarket[0],
 		market: market,
-	}
+	}, nil
 }
 
 func (b *BorsaItalianaQuoteLoader) Name() string {
