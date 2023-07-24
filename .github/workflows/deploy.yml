@@ -1,31 +1,108 @@
-name: 🚀 Deploy
+name: 📈 Update Quotes
 on:
   workflow_dispatch:
-  workflow_run:
-    workflows: ["📈 Update Quotes"]
-    types: [completed]
+  push:
     branches: [main]
+  schedule:
+    - cron: "0 */12 * * *"
 
-permissions:
-  contents: read
-  pages: write
-  id-token: write
+permissions: write-all
 
-# Allow only one concurrent deployment, skipping runs queued between the run in-progress and latest queued.
-# However, do NOT cancel in-progress runs as we want to allow these production deployments to complete.
 concurrency:
-  group: "pages"
-  cancel-in-progress: false
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
+  verify:
+    name: 🔎 Verify
+    runs-on: ubuntu-latest
+    steps:
+      - name: ⬇️ Checkout repo
+        uses: actions/checkout@v3
+
+      - name: 🐹 Setup Go
+        uses: actions/setup-go@v4
+
+      - name: 🔎 Verify dependencies
+        run: go mod verify
+
+  vet:
+    name: 👨‍⚕️ Vet
+    runs-on: ubuntu-latest
+    steps:
+      - name: ⬇️ Checkout repo
+        uses: actions/checkout@v3
+
+      - name: 🐹 Setup Go
+        uses: actions/setup-go@v4
+
+      - name: 👨‍⚕️ Vet
+        run: go vet ./...
+
+  lint:
+    name: 🔬 Lint
+    runs-on: ubuntu-latest
+    steps:
+      - name: ⬇️ Checkout repo
+        uses: actions/checkout@v3
+
+      - name: 🐹 Setup Go
+        uses: actions/setup-go@v4
+
+      - name: 🔬 Lint
+        uses: golangci/golangci-lint-action@v3
+        with:
+          version: v1.53
+
+  staticcheck:
+    name: 🚧 Static Check
+    runs-on: ubuntu-latest
+    steps:
+      - name: ⬇️ Checkout repo
+        uses: actions/checkout@v3
+
+      - name: 🐹 Setup Go
+        uses: actions/setup-go@v4
+
+      - name: 📥 Install staticcheck
+        run: go install honnef.co/go/tools/cmd/staticcheck@latest
+
+      - name: 🚧 staticcheck
+        run: staticcheck ./...
+
+  update-quotes:
+    name: 📈 Update Quotes
+    runs-on: ubuntu-latest
+    needs: [verify, vet, lint, staticcheck]
+    if: ${{ github.ref == 'refs/heads/main' }}
+    steps:
+      - name: ⬇️ Checkout repo
+        uses: actions/checkout@v3
+
+      - name: 🐹 Setup Go
+        uses: actions/setup-go@v4
+
+      - name: 🏗 Build
+        run: go build -o bin/portfolio-performance
+
+      - name: 📈 Run
+        run: ./bin/portfolio-performance
+
+      - name: ⬆️ Push all changes
+        uses: stefanzweifel/git-auto-commit-action@v4
+        with:
+          branch: main
+          add_options: "--all"
+          commit_message: Automated report
+          commit_options: "-a"
+
   deploy:
     name: 🚀 Deploy
     runs-on: ubuntu-latest
-
+    needs: [update-quotes]
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
-
     steps:
       - name: ⬇️ Checkout repo
         uses: actions/checkout@v3
