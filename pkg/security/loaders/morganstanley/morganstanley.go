@@ -10,7 +10,7 @@ import (
 	"time"
 
 	"github.com/charmbracelet/log"
-	"github.com/enrichman/portfolio-perfomance/pkg/security"
+	"github.com/enrichman/portfolio-performance/pkg/security"
 	"golang.org/x/exp/slices"
 )
 

@@ -6,7 +6,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/enrichman/portfolio-perfomance/pkg/security"
+	"github.com/enrichman/portfolio-performance/pkg/security"
 	"github.com/gocolly/colly/v2"
 )
 
