@@ -75,7 +75,7 @@ jobs:
     name: 📈 Update Quotes
     runs-on: ubuntu-latest
     needs: [verify, vet, lint, staticcheck]
-    if: ${{ github.ref == 'refs/heads/main' && github.event_name == 'push' }}
+    if: ${{ github.ref == 'refs/heads/main' }}
     steps:
       - name: ⬇️ Checkout repo
         uses: actions/checkout@v3
