@@ -4,7 +4,7 @@ on:
   workflow_run:
     workflows: ["📈 Update Quotes"]
     types: [completed]
-    branches: [dev]
+    branches: [main]
 
 permissions:
   contents: read
