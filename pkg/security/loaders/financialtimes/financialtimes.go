@@ -15,77 +15,83 @@ import (
 )
 
 const (
-	FinancialTimesUrl = "https://markets.ft.com/data/chartapi/series"
+	financialTimesURL = "https://markets.ft.com/data/chartapi/series"
 )
 
-type FinancialTimesQuoteLoader struct {
+// QuoteLoader ...
+type QuoteLoader struct {
 	name   string
 	isin   string
 	symbol string
 }
 
-func New(name, isin string) (*FinancialTimesQuoteLoader, error) {
+// New ...
+func New(name, isin string) (*QuoteLoader, error) {
 	isinLabelSymbol := strings.Split(isin, ".")
 
 	if len(isinLabelSymbol) != 2 {
-		return nil, fmt.Errorf("Wrong ISIN format for FinancialTimesQuoteLoader: \"%s\" - should be \"ISIN.symbol\"", isin)
+		return nil, fmt.Errorf("wrong ISIN format for FinancialTimesQuoteLoader: \"%s\" - should be \"ISIN.symbol\"", isin)
 	}
 
-	return &FinancialTimesQuoteLoader{
+	return &QuoteLoader{
 		name:   name,
 		isin:   isinLabelSymbol[0],
 		symbol: isinLabelSymbol[1],
 	}, nil
 }
 
-func (f *FinancialTimesQuoteLoader) Name() string {
+// Name ...
+func (f *QuoteLoader) Name() string {
 	return f.name
 }
 
-func (f *FinancialTimesQuoteLoader) ISIN() string {
+// ISIN ...
+func (f *QuoteLoader) ISIN() string {
 	return f.isin
 }
 
-func (f *FinancialTimesQuoteLoader) Symbol() string {
+// Symbol ...
+func (f *QuoteLoader) Symbol() string {
 	return f.symbol
 }
 
-type RequestPayload struct {
+type requestPayload struct {
 	Days           int              `json:"days"`
 	DataPeriod     string           `json:"dataPeriod"`
 	DataInterval   int              `json:"dataInterval"`
 	YFormat        string           `json:"yFormat"`
 	ReturnDateType string           `json:"returnDateType"`
-	Elements       []RequestElement `json:"elements"`
+	Elements       []requestElement `json:"elements"`
 }
 
-type RequestElement struct {
+type requestElement struct {
 	Type   string `json:"Type"`
 	Symbol string `json:"Symbol"`
 }
 
-type ResponsePayload struct {
+type responsePayload struct {
 	Dates    []string          `json:"Dates"`
-	Elements []ResponseElement `json:"Elements"`
+	Elements []responseElement `json:"Elements"`
 }
 
-type ResponseElement struct {
-	ComponentSeries []ComponentSeries `json:"ComponentSeries"`
+type responseElement struct {
+	ComponentSeries []componentSeries `json:"ComponentSeries"`
 }
 
-type ComponentSeries struct {
+type componentSeries struct {
 	Type   string    `json:"Type"`
 	Values []float32 `json:"Values"`
 }
 
-func (f *FinancialTimesQuoteLoader) LoadQuotes() ([]security.Quote, error) {
-	payload := RequestPayload{
+// LoadQuotes ...
+func (f *QuoteLoader) LoadQuotes() ([]security.Quote, error) {
+	payload := requestPayload{
 		Days:           365 * 30,
 		DataPeriod:     "Day",
 		DataInterval:   1,
 		YFormat:        "0.###",
 		ReturnDateType: "ISO8601",
-		Elements: []RequestElement{
+		Elements: []requestElement{
 			{
 				Type:   "price",
 				Symbol: f.symbol,
@@ -99,7 +105,7 @@ func (f *FinancialTimesQuoteLoader) LoadQuotes() ([]security.Quote, error) {
 	}
 
 	res, err := http.Post(
-		FinancialTimesUrl,
+		financialTimesURL,
 		"application/json",
 		bytes.NewBuffer(payloadBytes),
 	)
@@ -112,21 +118,21 @@ func (f *FinancialTimesQuoteLoader) LoadQuotes() ([]security.Quote, error) {
 		return nil, fmt.Errorf("error reading body: %w", err)
 	}
 
-	var result ResponsePayload
+	var result responsePayload
 	err = json.Unmarshal(bodyBytes, &result)
 	if err != nil {
 		return nil, fmt.Errorf("error unmarshaling body: %w", err)
 	}
 
-	componentSeries := result.Elements[0].ComponentSeries
-	componentIdx := slices.IndexFunc(componentSeries, func(c ComponentSeries) bool {
+	series := result.Elements[0].ComponentSeries
+	closeIdx := slices.IndexFunc(series, func(c componentSeries) bool {
 		return c.Type == "Close"
 	})
-	if componentIdx == -1 {
+	if closeIdx == -1 {
 		return nil, nil
 	}
 
-	component := componentSeries[componentIdx]
+	component := series[closeIdx]
 
 	dates := result.Dates
 	values := component.Values

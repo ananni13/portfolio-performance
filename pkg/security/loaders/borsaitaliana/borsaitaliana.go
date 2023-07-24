@@ -13,42 +13,46 @@ import (
 )
 
 const (
-	BorsaItalianaUrl = "https://charts.borsaitaliana.it/charts/services/ChartWService.asmx/GetPricesWithVolume"
+	borsaItalianaURL = "https://charts.borsaitaliana.it/charts/services/ChartWService.asmx/GetPricesWithVolume"
 )
 
-type BorsaItalianaQuoteLoader struct {
+// QuoteLoader ...
+type QuoteLoader struct {
 	name   string
 	isin   string
 	market string
 }
 
-func New(name, isin string) (*BorsaItalianaQuoteLoader, error) {
+// New ...
+func New(name, isin string) (*QuoteLoader, error) {
 	isinMarket := strings.Split(isin, ".")
 
 	if len(isinMarket) != 2 {
-		return nil, fmt.Errorf("Wrong ISIN format for BorsaItalianaQuoteLoader: \"%s\" - should be \"ISIN.market\"", isin)
+		return nil, fmt.Errorf("wrong ISIN format for BorsaItalianaQuoteLoader: \"%s\" - should be \"ISIN.market\"", isin)
 	}
 
-	return &BorsaItalianaQuoteLoader{
+	return &QuoteLoader{
 		name:   name,
 		isin:   isinMarket[0],
 		market: isinMarket[1],
 	}, nil
 }
 
-func (b *BorsaItalianaQuoteLoader) Name() string {
+// Name ...
+func (b *QuoteLoader) Name() string {
 	return b.name
 }
 
-func (b *BorsaItalianaQuoteLoader) ISIN() string {
+// ISIN ...
+func (b *QuoteLoader) ISIN() string {
 	return b.isin
 }
 
-type Data struct {
+type data struct {
 	Data [][5]float32 `json:"d"`
 }
 
-type RequestPayload struct {
+type requestPayload struct {
 	SampleTime           string
 	TimeFrame            string
 	RequestedDataSetType string
@@ -63,8 +67,9 @@ type RequestPayload struct {
 	Language             string
 }
 
-func (b *BorsaItalianaQuoteLoader) LoadQuotes() ([]security.Quote, error) {
-	payload := RequestPayload{
+// LoadQuotes ...
+func (b *QuoteLoader) LoadQuotes() ([]security.Quote, error) {
+	payload := requestPayload{
 		SampleTime:           "1d",
 		TimeFrame:            "10y",
 		RequestedDataSetType: "ohlc",
@@ -76,14 +81,14 @@ func (b *BorsaItalianaQuoteLoader) LoadQuotes() ([]security.Quote, error) {
 	}
 
 	payloadBytes, err := json.Marshal(struct {
-		Request RequestPayload `json:"request"`
+		Request requestPayload `json:"request"`
 	}{Request: payload})
 	if err != nil {
 		return nil, fmt.Errorf("error marshaling request body")
 	}
 
 	res, err := http.Post(
-		BorsaItalianaUrl,
+		borsaItalianaURL,
 		"application/json",
 		bytes.NewBuffer(payloadBytes),
 	)
@@ -96,7 +101,7 @@ func (b *BorsaItalianaQuoteLoader) LoadQuotes() ([]security.Quote, error) {
 		return nil, fmt.Errorf("error reading body: %w", err)
 	}
 
-	var result Data
+	var result data
 	err = json.Unmarshal(bodyBytes, &result)
 	if err != nil {
 		return nil, fmt.Errorf("error unmarshaling body: %w", err)

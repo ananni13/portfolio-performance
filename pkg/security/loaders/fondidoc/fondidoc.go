@@ -12,43 +12,49 @@ import (
 )
 
 const (
-	FondiDocUrlTemplate = "https://www.fondidoc.it/Chart/ChartData?ids=%s&cur=EUR"
+	fondiDocURLTemplate = "https://www.fondidoc.it/Chart/ChartData?ids=%s&cur=EUR"
 )
 
-type FondiDocQuoteLoader struct {
+// QuoteLoader ...
+type QuoteLoader struct {
 	name   string
 	isin   string
-	fundId string
+	fundID string
 }
 
-func New(name, isin string) (*FondiDocQuoteLoader, error) {
-	isinId := strings.Split(isin, ".")
+// New ...
+func New(name, isin string) (*QuoteLoader, error) {
+	isinID := strings.Split(isin, ".")
 
-	if len(isinId) != 2 {
-		return nil, fmt.Errorf("Wrong ISIN format for FondiDocQuoteLoader: \"%s\" - should be \"ISIN.fundId\"", isin)
+	if len(isinID) != 2 {
+		return nil, fmt.Errorf("wrong ISIN format for FondiDocQuoteLoader: \"%s\" - should be \"ISIN.fundID\"", isin)
 	}
 
-	return &FondiDocQuoteLoader{
+	return &QuoteLoader{
 		name:   name,
-		isin:   isinId[0],
-		fundId: isinId[1],
+		isin:   isinID[0],
+		fundID: isinID[1],
 	}, nil
 }
 
-func (f *FondiDocQuoteLoader) Name() string {
+// Name ...
+func (f *QuoteLoader) Name() string {
 	return f.name
 }
 
-func (f *FondiDocQuoteLoader) ISIN() string {
+// ISIN ...
+func (f *QuoteLoader) ISIN() string {
 	return f.isin
 }
 
-func (f *FondiDocQuoteLoader) FundId() string {
-	return f.fundId
+// FundID ...
+func (f *QuoteLoader) FundID() string {
+	return f.fundID
 }
 
-func (f *FondiDocQuoteLoader) LoadQuotes() ([]security.Quote, error) {
-	url := fmt.Sprintf(FondiDocUrlTemplate, f.fundId)
+// LoadQuotes ...
+func (f *QuoteLoader) LoadQuotes() ([]security.Quote, error) {
+	url := fmt.Sprintf(fondiDocURLTemplate, f.fundID)
 
 	res, err := http.Get(url)
 	if err != nil {
@@ -69,7 +75,7 @@ func (f *FondiDocQuoteLoader) LoadQuotes() ([]security.Quote, error) {
 		return nil, fmt.Errorf("error unmarshaling body: %w", err)
 	}
 
-	fundData := fondiDoc[f.fundId].(map[string]interface{})
+	fundData := fondiDoc[f.fundID].(map[string]interface{})
 
 	quotes := []security.Quote{}
 	for _, quote := range fundData["data"].([]interface{}) {
