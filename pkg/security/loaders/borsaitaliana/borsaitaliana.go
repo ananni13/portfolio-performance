@@ -63,7 +63,7 @@ type RequestPayload struct {
 func (b *BorsaItalianaQuoteLoader) LoadQuotes() ([]security.Quote, error) {
 	payload := RequestPayload{
 		SampleTime:           "1d",
-		TimeFrame:            "5y",
+		TimeFrame:            "10y",
 		RequestedDataSetType: "ohlc",
 		ChartPriceType:       "price",
 		Key:                  fmt.Sprintf("%s.%s", b.isin, b.market),
