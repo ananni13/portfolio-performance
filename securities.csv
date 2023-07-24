@@ -1,18 +1,15 @@
+isin,name,loader
 ###################
 # Borsa Italiana
 ###################
 
-
 # BTP
-
 "IT0005547408.MOT","Btp Valore Gn27 Eur","borsaitaliana"
 "IT0005532723.MOT","Btp Italia Mz28 Eur","borsaitaliana"
 "IT0005497000.MOT","Btp Italia Gn30 Eur","borsaitaliana"
 "IT0005494239.MOT","Btp Tf 2,5% Dc32 Eur","borsaitaliana"
 
-
 # Bond
-
 "AT0000A324S8.MOT","Austria Tf 2,9% Fb33 Eur","borsaitaliana"
 "DE0001102358.MOT","Bund Tf 1.5% Mg24 Eur","borsaitaliana"
 "DE0001102366.MOT","Bund Tf 1% Ag24 Eur","borsaitaliana"
@@ -25,17 +22,13 @@
 # Fondi pensione
 ###################
 
-
 # Fon.Te.
-
 "FP-FonTe-Conservativo.garantito","Fondo Pensione Fon.Te. - Comparto Conservativo","fonte"
 "FP-FonTe-Sviluppo.bilanciato","Fondo Pensione Fon.Te. - Comparto Sviluppo","fonte"
 "FP-FonTe-Crescita.crescita","Fondo Pensione Fon.Te. - Comparto Crescita","fonte"
 "FP-FonTe-Dinamico.dinamico","Fondo Pensione Fon.Te. - Comparto Dinamico","fonte"
 
-
 # Secondapensione
-
 "QS0000003560","SecondaPensione Prudente ESG","secondapensione"
 "QS0000003564","SecondaPensione Sviluppo ESG","secondapensione"
 "QS0000013033","SecondaPensione Garantita ESG","secondapensione"
