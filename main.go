@@ -61,7 +61,10 @@ func loadSecuritiesFromCSV(path string) error {
 	csvReader := csv.NewReader(f)
 	csvReader.Comment = '#'
 	csvReader.FieldsPerRecord = 3
-	csvReader.Read() // skip header line
+	_, err = csvReader.Read() // skip header line
+	if err != nil {
+		return fmt.Errorf("reading csv: %w", err)
+	}
 
 	data, err := csvReader.ReadAll()
 	if err != nil {
