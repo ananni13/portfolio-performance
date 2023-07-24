@@ -8,23 +8,23 @@ import (
 	"github.com/charmbracelet/log"
 )
 
-// Securities ...
+// Securities will contain all loaded securities mapped to the appropriate QuoteLoader.
 var Securities = make(map[string]QuoteLoader)
 
-// QuoteLoader ...
+// QuoteLoader interface.
 type QuoteLoader interface {
 	Name() string
 	ISIN() string
 	LoadQuotes() ([]Quote, error)
 }
 
-// Quote ...
+// Quote struct.
 type Quote struct {
 	Date  time.Time `json:"date"`
 	Close float32   `json:"close"`
 }
 
-// Register ...
+// Register registers a security with its QuoteLoader in the Securities map.
 func Register(fund QuoteLoader) {
 	isin := fund.ISIN()
 	if isin == "" {
@@ -39,7 +39,7 @@ func Register(fund QuoteLoader) {
 	log.Info(fmt.Sprintf("security '%s' registered", isin))
 }
 
-// Merge ...
+// Merge merges two Quote slices together
 func Merge(quotes1 []Quote, quotes2 []Quote) []Quote {
 	quotesMap := map[time.Time]Quote{}
 

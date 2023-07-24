@@ -16,19 +16,19 @@ const (
 	borsaItalianaURL = "https://charts.borsaitaliana.it/charts/services/ChartWService.asmx/GetPricesWithVolume"
 )
 
-// QuoteLoader ...
+// QuoteLoader struct for BorsaItaliana.
 type QuoteLoader struct {
 	name   string
 	isin   string
 	market string
 }
 
-// New ...
+// New creates a BorsaItaliana QuoteLoader.
 func New(name, isin string) (*QuoteLoader, error) {
 	isinMarket := strings.Split(isin, ".")
 
 	if len(isinMarket) != 2 {
-		return nil, fmt.Errorf("wrong ISIN format for BorsaItalianaQuoteLoader: \"%s\" - should be \"ISIN.market\"", isin)
+		return nil, fmt.Errorf("wrong ISIN format for BorsaItaliana QuoteLoader: \"%s\" - should be \"ISIN.market\"", isin)
 	}
 
 	return &QuoteLoader{
@@ -38,12 +38,12 @@ func New(name, isin string) (*QuoteLoader, error) {
 	}, nil
 }
 
-// Name ...
+// Name returns the QuoteLoader name.
 func (b *QuoteLoader) Name() string {
 	return b.name
 }
 
-// ISIN ...
+// ISIN returns the QuoteLoader isin.
 func (b *QuoteLoader) ISIN() string {
 	return b.isin
 }
@@ -67,7 +67,7 @@ type requestPayload struct {
 	Language             string
 }
 
-// LoadQuotes ...
+// LoadQuotes fetches quotes from BorsaItaliana.
 func (b *QuoteLoader) LoadQuotes() ([]security.Quote, error) {
 	payload := requestPayload{
 		SampleTime:           "1d",

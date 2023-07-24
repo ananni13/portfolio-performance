@@ -18,19 +18,19 @@ const (
 	financialTimesURL = "https://markets.ft.com/data/chartapi/series"
 )
 
-// QuoteLoader ...
+// QuoteLoader struct for FinancialTimes.
 type QuoteLoader struct {
 	name   string
 	isin   string
 	symbol string
 }
 
-// New ...
+// New creates a FinancialTimes QuoteLoader.
 func New(name, isin string) (*QuoteLoader, error) {
 	isinLabelSymbol := strings.Split(isin, ".")
 
 	if len(isinLabelSymbol) != 2 {
-		return nil, fmt.Errorf("wrong ISIN format for FinancialTimesQuoteLoader: \"%s\" - should be \"ISIN.symbol\"", isin)
+		return nil, fmt.Errorf("wrong ISIN format for FinancialTimes QuoteLoader: \"%s\" - should be \"ISIN.symbol\"", isin)
 	}
 
 	return &QuoteLoader{
@@ -40,17 +40,17 @@ func New(name, isin string) (*QuoteLoader, error) {
 	}, nil
 }
 
-// Name ...
+// Name returns the QuoteLoader name.
 func (f *QuoteLoader) Name() string {
 	return f.name
 }
 
-// ISIN ...
+// ISIN returns the QuoteLoader isin.
 func (f *QuoteLoader) ISIN() string {
 	return f.isin
 }
 
-// Symbol ...
+// Symbol returns the QuoteLoader symbol.
 func (f *QuoteLoader) Symbol() string {
 	return f.symbol
 }
@@ -83,7 +83,7 @@ type componentSeries struct {
 	Values []float32 `json:"Values"`
 }
 
-// LoadQuotes ...
+// LoadQuotes fetches quotes from FinancialTimes.
 func (f *QuoteLoader) LoadQuotes() ([]security.Quote, error) {
 	payload := requestPayload{
 		Days:           365 * 30,

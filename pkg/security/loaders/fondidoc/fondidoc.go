@@ -15,19 +15,19 @@ const (
 	fondiDocURLTemplate = "https://www.fondidoc.it/Chart/ChartData?ids=%s&cur=EUR"
 )
 
-// QuoteLoader ...
+// QuoteLoader struct for FondiDoc.
 type QuoteLoader struct {
 	name   string
 	isin   string
 	fundID string
 }
 
-// New ...
+// New creates a FondiDoc QuoteLoader.
 func New(name, isin string) (*QuoteLoader, error) {
 	isinID := strings.Split(isin, ".")
 
 	if len(isinID) != 2 {
-		return nil, fmt.Errorf("wrong ISIN format for FondiDocQuoteLoader: \"%s\" - should be \"ISIN.fundID\"", isin)
+		return nil, fmt.Errorf("wrong ISIN format for FondiDoc QuoteLoader: \"%s\" - should be \"ISIN.fundID\"", isin)
 	}
 
 	return &QuoteLoader{
@@ -37,22 +37,22 @@ func New(name, isin string) (*QuoteLoader, error) {
 	}, nil
 }
 
-// Name ...
+// Name returns the QuoteLoader name.
 func (f *QuoteLoader) Name() string {
 	return f.name
 }
 
-// ISIN ...
+// ISIN returns the QuoteLoader isin.
 func (f *QuoteLoader) ISIN() string {
 	return f.isin
 }
 
-// FundID ...
+// FundID returns the QuoteLoader fundID.
 func (f *QuoteLoader) FundID() string {
 	return f.fundID
 }
 
-// LoadQuotes ...
+// LoadQuotes fetches quotes from FondiDoc.
 func (f *QuoteLoader) LoadQuotes() ([]security.Quote, error) {
 	url := fmt.Sprintf(fondiDocURLTemplate, f.fundID)
 

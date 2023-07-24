@@ -14,13 +14,13 @@ const (
 	secondaPensioneURLTemplate = "https://www.secondapensione.it/ezjscore/call/ezjscamundibuzz::sfForwardFront::paramsList=service=ProxyProductSheetV3Front&routeId=_en-GB_879_%s_tab_3"
 )
 
-// QuoteLoader ...
+// QuoteLoader struct for SecondaPensione.
 type QuoteLoader struct {
 	name string
 	isin string
 }
 
-// New ...
+// New creates a SecondaPensione QuoteLoader.
 func New(name, isin string) (*QuoteLoader, error) {
 	return &QuoteLoader{
 		name: name,
@@ -28,17 +28,17 @@ func New(name, isin string) (*QuoteLoader, error) {
 	}, nil
 }
 
-// Name ...
+// Name returns the QuoteLoader name.
 func (s *QuoteLoader) Name() string {
 	return s.name
 }
 
-// ISIN ...
+// ISIN returns the QuoteLoader isin.
 func (s *QuoteLoader) ISIN() string {
 	return s.isin
 }
 
-// LoadQuotes ...
+// LoadQuotes fetches quotes from SecondaPensione.
 func (s *QuoteLoader) LoadQuotes() ([]security.Quote, error) {
 	c := colly.NewCollector()
 

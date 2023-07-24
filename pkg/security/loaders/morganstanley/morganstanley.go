@@ -18,7 +18,7 @@ const (
 	morganStanleyURLTemplate = "https://www.morganstanley.com/pub/content/dam/im/json/imwebdata/im/data/product/OF/%s/chart/historicalNav.json"
 )
 
-// QuoteLoader ...
+// QuoteLoader struct for MorganStanley.
 type QuoteLoader struct {
 	name         string
 	isin         string
@@ -26,12 +26,12 @@ type QuoteLoader struct {
 	shareClassID string
 }
 
-// New ...
+// New creates a MorganStanley QuoteLoader.
 func New(name, isin string) (*QuoteLoader, error) {
 	isinFundIDShareID := strings.Split(isin, ".")
 
 	if len(isinFundIDShareID) != 3 {
-		return nil, fmt.Errorf("wrong ISIN format for MorganStanleyQuoteLoader: \"%s\" - should be \"ISIN.fundID.shareClassID\"", isin)
+		return nil, fmt.Errorf("wrong ISIN format for MorganStanley QuoteLoader: \"%s\" - should be \"ISIN.fundID.shareClassID\"", isin)
 	}
 
 	return &QuoteLoader{
@@ -42,22 +42,22 @@ func New(name, isin string) (*QuoteLoader, error) {
 	}, nil
 }
 
-// Name ...
+// Name returns the QuoteLoader name.
 func (m *QuoteLoader) Name() string {
 	return m.name
 }
 
-// ISIN ...
+// ISIN returns the QuoteLoader isin.
 func (m *QuoteLoader) ISIN() string {
 	return m.isin
 }
 
-// FundID ...
+// FundID returns the QuoteLoader fundID.
 func (m *QuoteLoader) FundID() string {
 	return m.fundID
 }
 
-// ShareClassID ...
+// ShareClassID returns the QuoteLoader shareClassID.
 func (m *QuoteLoader) ShareClassID() string {
 	return m.shareClassID
 }
@@ -87,7 +87,7 @@ type series struct {
 	Data     []string `json:"data"`
 }
 
-// LoadQuotes ...
+// LoadQuotes fetches quotes from MorganStanley.
 func (m *QuoteLoader) LoadQuotes() ([]security.Quote, error) {
 	url := fmt.Sprintf(morganStanleyURLTemplate, m.fundID)
 

@@ -14,19 +14,19 @@ const (
 	fonTeURLTemplate = "https://www.fondofonte.it/gestione-finanziaria/i-valori-quota-dei-comparti/comparto-%s/"
 )
 
-// QuoteLoader ...
+// QuoteLoader struct for FonTe.
 type QuoteLoader struct {
 	name    string
 	isin    string
 	urlName string
 }
 
-// New ...
+// New creates a FonTe QuoteLoader.
 func New(name, isin string) (*QuoteLoader, error) {
 	isinURLName := strings.Split(isin, ".")
 
 	if len(isinURLName) != 2 {
-		return nil, fmt.Errorf("wrong ISIN format for FonteQuoteLoader: \"%s\" - should be \"ISIN.URLName\"", isin)
+		return nil, fmt.Errorf("wrong ISIN format for FonTe QuoteLoader: \"%s\" - should be \"ISIN.URLName\"", isin)
 	}
 
 	return &QuoteLoader{
@@ -36,22 +36,22 @@ func New(name, isin string) (*QuoteLoader, error) {
 	}, nil
 }
 
-// Name ...
+// Name returns the QuoteLoader name.
 func (f *QuoteLoader) Name() string {
 	return f.name
 }
 
-// ISIN ...
+// ISIN returns the QuoteLoader isin.
 func (f *QuoteLoader) ISIN() string {
 	return f.isin
 }
 
-// URLName ...
+// URLName returns the QuoteLoader urlName.
 func (f *QuoteLoader) URLName() string {
 	return f.urlName
 }
 
-// LoadQuotes ...
+// LoadQuotes fetches quotes from FonTe.
 func (f *QuoteLoader) LoadQuotes() ([]security.Quote, error) {
 	c := colly.NewCollector()
 
