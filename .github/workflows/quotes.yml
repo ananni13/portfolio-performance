@@ -49,11 +49,10 @@ jobs:
       - name: 🐹 Setup Go
         uses: actions/setup-go@v4
 
-      - name: 📥 Install golint
-        run: go install golang.org/x/lint/golint@latest
-
-      - name: 🔬 golint
-        run: golint ./...
+      - name: 🔬 Lint
+        uses: golangci/golangci-lint-action@v3
+        with:
+          version: v1.53
 
   staticcheck:
     name: 🚧 Static Check
