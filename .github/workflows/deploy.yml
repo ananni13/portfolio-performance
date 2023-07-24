@@ -1,4 +1,4 @@
-name: 📈 Update Quotes
+name: 🚀 Deploy
 on:
   workflow_dispatch:
   push:
