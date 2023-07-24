@@ -7,15 +7,17 @@ import (
 	"fmt"
 	"os"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/charmbracelet/log"
-	"github.com/enrichman/portfolio-perfomance/pkg/security"
-	"github.com/enrichman/portfolio-perfomance/pkg/security/loaders/borsaitaliana"
-	"github.com/enrichman/portfolio-perfomance/pkg/security/loaders/fondidoc"
-	"github.com/enrichman/portfolio-perfomance/pkg/security/loaders/fonte"
-	"github.com/enrichman/portfolio-perfomance/pkg/security/loaders/morganstanley"
-	"github.com/enrichman/portfolio-perfomance/pkg/security/loaders/secondapensione"
+	"github.com/enrichman/portfolio-performance/pkg/security"
+	"github.com/enrichman/portfolio-performance/pkg/security/loaders/borsaitaliana"
+	"github.com/enrichman/portfolio-performance/pkg/security/loaders/financialtimes"
+	"github.com/enrichman/portfolio-performance/pkg/security/loaders/fondidoc"
+	"github.com/enrichman/portfolio-performance/pkg/security/loaders/fonte"
+	"github.com/enrichman/portfolio-performance/pkg/security/loaders/morganstanley"
+	"github.com/enrichman/portfolio-performance/pkg/security/loaders/secondapensione"
 )
 
 func main() {
@@ -31,68 +33,84 @@ func main() {
 
 	log.Infof("loaded %d securities", len(security.Securities))
 
-	for isin, f := range security.Securities {
-		start := time.Now().In(time.UTC)
+	var wg sync.WaitGroup
 
-		log.Infof("[%s] loading quotes for '%s'", f.ISIN(), f.Name())
+	for isin, loader := range security.Securities {
+		wg.Add(1)
 
-		newQuotes, err := f.LoadQuotes()
-		if err != nil {
-			log.Errorf("error loading quotes: %s", err)
-			continue
-		}
-		if len(newQuotes) == 0 {
-			log.Warn("no quotes found")
-			continue
-		}
+		isin := isin
+		loader := loader
 
-		log.Debug("new quotes loaded",
-			"from", newQuotes[0].Date,
-			"to", newQuotes[len(newQuotes)-1].Date,
-		)
-
-		filename := fmt.Sprintf("out/json/%s.json", isin)
-		log.Debugf("loading OLD quotes from '%s'", filename)
-
-		oldQuotes, err := loadQuotesFromFile(filename)
-		if err != nil {
-			log.Errorf("error loading quotes: %s", err.Error())
-			continue
-		}
-
-		if len(oldQuotes) == 0 {
-			log.Warn("no OLD quotes found")
-		} else {
-			log.Debug("found OLD quotes",
-				"from", oldQuotes[0].Date,
-				"to", oldQuotes[len(oldQuotes)-1].Date,
-			)
-		}
-
-		mergedQuotes := security.Merge(oldQuotes, newQuotes)
-		log.Debug("merged quotes",
-			"from", mergedQuotes[0].Date,
-			"to", mergedQuotes[len(mergedQuotes)-1].Date,
-		)
-
-		err = writeQuotesToFile(filename, mergedQuotes)
-		if err != nil {
-			log.Errorf("error writing quotes: %s", err.Error())
-			continue
-		}
-
-		addedQuotes := len(mergedQuotes) - len(oldQuotes)
-		if addedQuotes == 0 {
-			log.Infof("[%s] no new quotes added", f.ISIN())
-		} else {
-			log.Infof(
-				"[%s] new quotes added [%d] - old [%d] - new [%d]",
-				f.ISIN(), addedQuotes, len(oldQuotes), len(newQuotes),
-			)
-		}
-
-		log.Infof("[%s] quotes loaded in %s", f.ISIN(), time.Since(start))
+		go func() {
+			defer wg.Done()
+			loadQuotes(isin, loader)
+		}()
 	}
+
+	wg.Wait()
+}
+
+func loadQuotes(isin string, loader security.QuoteLoader) {
+	start := time.Now().In(time.UTC)
+
+	log.Infof("[%s] loading quotes for '%s'", loader.ISIN(), loader.Name())
+
+	newQuotes, err := loader.LoadQuotes()
+	if err != nil {
+		log.Errorf("error loading quotes: %s", err)
+		return
+	}
+	if len(newQuotes) == 0 {
+		log.Warn("no quotes found")
+		return
+	}
+
+	log.Debug("new quotes loaded",
+		"from", newQuotes[0].Date,
+		"to", newQuotes[len(newQuotes)-1].Date,
+	)
+
+	filename := fmt.Sprintf("out/json/%s.json", isin)
+	log.Debugf("loading OLD quotes from '%s'", filename)
+
+	oldQuotes, err := loadQuotesFromFile(filename)
+	if err != nil {
+		log.Errorf("error loading quotes: %s", err.Error())
+		return
+	}
+
+	if len(oldQuotes) == 0 {
+		log.Warn("no OLD quotes found")
+	} else {
+		log.Debug("found OLD quotes",
+			"from", oldQuotes[0].Date,
+			"to", oldQuotes[len(oldQuotes)-1].Date,
+		)
+	}
+
+	mergedQuotes := security.Merge(oldQuotes, newQuotes)
+	log.Debug("merged quotes",
+		"from", mergedQuotes[0].Date,
+		"to", mergedQuotes[len(mergedQuotes)-1].Date,
+	)
+
+	err = writeQuotesToFile(filename, mergedQuotes)
+	if err != nil {
+		log.Errorf("error writing quotes: %s", err.Error())
+		return
+	}
+
+	addedQuotes := len(mergedQuotes) - len(oldQuotes)
+	if addedQuotes == 0 {
+		log.Infof("[%s] no new quotes added", loader.ISIN())
+	} else {
+		log.Infof(
+			"[%s] new quotes added [%d] - old [%d] - new [%d]",
+			loader.ISIN(), addedQuotes, len(oldQuotes), len(newQuotes),
+		)
+	}
+
+	log.Infof("[%s] quotes loaded in %s", loader.ISIN(), time.Since(start))
 }
 
 func loadQuotesFromFile(filename string) ([]security.Quote, error) {
@@ -145,6 +163,8 @@ func loadSecuritiesFromCSV(path string) error {
 	// read csv values using csv.Reader
 	csvReader := csv.NewReader(f)
 	csvReader.Comment = '#'
+	csvReader.FieldsPerRecord = 3
+	csvReader.Read() // skip header line
 
 	data, err := csvReader.ReadAll()
 	if err != nil {
@@ -156,22 +176,9 @@ func loadSecuritiesFromCSV(path string) error {
 		name := line[1]
 		loader := line[2]
 
-		var quoteLoader security.QuoteLoader
-		switch loader {
-		case "borsaitaliana":
-			quoteLoader = borsaitaliana.New(name, isin)
-		case "fonte":
-			quoteLoader = fonte.New(name, isin)
-		case "secondapensione":
-			quoteLoader = secondapensione.New(name, isin)
-		case "fondidoc":
-			quoteLoader = fondidoc.New(name, isin)
-		case "morganstanley":
-			quoteLoader = morganstanley.New(name, isin)
-		}
-
-		if quoteLoader == nil {
-			log.Warnf("quoteLoader [%s] not found for ISIN %s (%s)", loader, isin, name)
+		quoteLoader, err := getQuoteLoader(loader, name, isin)
+		if err != nil {
+			log.Warnf("Error creating quoteLoader [%s] for ISIN %s (%s): %s", loader, isin, name, err)
 			continue
 		}
 
@@ -179,4 +186,22 @@ func loadSecuritiesFromCSV(path string) error {
 	}
 
 	return nil
+}
+
+func getQuoteLoader(loader, name, isin string) (security.QuoteLoader, error) {
+	switch loader {
+	case "borsaitaliana":
+		return borsaitaliana.New(name, isin)
+	case "financialtimes":
+		return financialtimes.New(name, isin)
+	case "fonte":
+		return fonte.New(name, isin)
+	case "secondapensione":
+		return secondapensione.New(name, isin)
+	case "fondidoc":
+		return fondidoc.New(name, isin)
+	case "morganstanley":
+		return morganstanley.New(name, isin)
+	}
+	return nil, fmt.Errorf("quoteLoader [%s] not found", loader)
 }

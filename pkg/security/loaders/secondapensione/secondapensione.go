@@ -5,38 +5,44 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/enrichman/portfolio-perfomance/pkg/security"
+	"github.com/charmbracelet/log"
+	"github.com/enrichman/portfolio-performance/pkg/security"
 	"github.com/gocolly/colly/v2"
 )
 
 const (
-	SecondaPensioneUrlTemplate = "https://www.secondapensione.it/ezjscore/call/ezjscamundibuzz::sfForwardFront::paramsList=service=ProxyProductSheetV3Front&routeId=_en-GB_879_%s_tab_3"
+	secondaPensioneURLTemplate = "https://www.secondapensione.it/ezjscore/call/ezjscamundibuzz::sfForwardFront::paramsList=service=ProxyProductSheetV3Front&routeId=_en-GB_879_%s_tab_3"
 )
 
-type SecondaPensione struct {
+// QuoteLoader ...
+type QuoteLoader struct {
 	name string
 	isin string
 }
 
-func New(name, isin string) *SecondaPensione {
-	return &SecondaPensione{
+// New ...
+func New(name, isin string) (*QuoteLoader, error) {
+	return &QuoteLoader{
 		name: name,
 		isin: isin,
-	}
+	}, nil
 }
 
-func (e *SecondaPensione) Name() string {
-	return e.name
+// Name ...
+func (s *QuoteLoader) Name() string {
+	return s.name
 }
 
-func (e *SecondaPensione) ISIN() string {
-	return e.isin
+// ISIN ...
+func (s *QuoteLoader) ISIN() string {
+	return s.isin
 }
 
-func (s *SecondaPensione) LoadQuotes() ([]security.Quote, error) {
+// LoadQuotes ...
+func (s *QuoteLoader) LoadQuotes() ([]security.Quote, error) {
 	c := colly.NewCollector()
 
-	url := fmt.Sprintf(SecondaPensioneUrlTemplate, s.isin)
+	url := fmt.Sprintf(secondaPensioneURLTemplate, s.isin)
 
 	quotes := []security.Quote{}
 
@@ -50,12 +56,14 @@ func (s *SecondaPensione) LoadQuotes() ([]security.Quote, error) {
 
 			date, err := time.Parse("02/01/2006", dateString)
 			if err != nil {
-				panic(err)
+				log.Warnf("Error parsing date: %s", err)
+				return
 			}
 
 			closeQuote, err := strconv.ParseFloat(valueString, 32)
 			if err != nil {
-				panic(err)
+				log.Warnf("Error parsing quote: %s", err)
+				return
 			}
 
 			quotes = append(quotes, security.Quote{

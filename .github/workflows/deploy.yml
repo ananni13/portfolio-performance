@@ -3,11 +3,8 @@ on:
   workflow_dispatch:
   workflow_run:
     workflows: ["📈 Update Quotes"]
-    types:
-      - completed
-  push:
-    branches:
-      - main
+    types: [completed]
+    branches: [dev]
 
 permissions:
   contents: read

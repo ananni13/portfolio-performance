@@ -10,80 +10,86 @@ import (
 	"time"
 
 	"github.com/charmbracelet/log"
-	"github.com/enrichman/portfolio-perfomance/pkg/security"
+	"github.com/enrichman/portfolio-performance/pkg/security"
 	"golang.org/x/exp/slices"
 )
 
 const (
-	MorganStanleyUrlTemplate = "https://www.morganstanley.com/pub/content/dam/im/json/imwebdata/im/data/product/OF/%s/chart/historicalNav.json"
+	morganStanleyURLTemplate = "https://www.morganstanley.com/pub/content/dam/im/json/imwebdata/im/data/product/OF/%s/chart/historicalNav.json"
 )
 
-type MorganStanleyQuoteLoader struct {
+// QuoteLoader ...
+type QuoteLoader struct {
 	name         string
 	isin         string
-	fundId       string
-	shareClassId string
+	fundID       string
+	shareClassID string
 }
 
-func New(name, isin string) *MorganStanleyQuoteLoader {
-	isinIdShareId := strings.Split(isin, ".")
+// New ...
+func New(name, isin string) (*QuoteLoader, error) {
+	isinFundIDShareID := strings.Split(isin, ".")
 
-	if len(isinIdShareId) != 3 {
-		log.Warnf("Wrong ISIN format for MorganStanleyQuoteLoader: \"%s\" - should be \"ISIN.fundId.shareClassId\"", isin)
-		return nil
+	if len(isinFundIDShareID) != 3 {
+		return nil, fmt.Errorf("wrong ISIN format for MorganStanleyQuoteLoader: \"%s\" - should be \"ISIN.fundID.shareClassID\"", isin)
 	}
 
-	return &MorganStanleyQuoteLoader{
+	return &QuoteLoader{
 		name:         name,
-		isin:         isinIdShareId[0],
-		fundId:       isinIdShareId[1],
-		shareClassId: isinIdShareId[2],
-	}
+		isin:         isinFundIDShareID[0],
+		fundID:       isinFundIDShareID[1],
+		shareClassID: isinFundIDShareID[2],
+	}, nil
 }
 
-type HistoricalNav struct {
-	En En `json:"en"`
+// Name ...
+func (m *QuoteLoader) Name() string {
+	return m.name
 }
 
-type En struct {
-	ShareClasses []ShareClass `json:"shareClasses"`
+// ISIN ...
+func (m *QuoteLoader) ISIN() string {
+	return m.isin
 }
 
-type ShareClass struct {
-	Id         string     `json:"id"`
+// FundID ...
+func (m *QuoteLoader) FundID() string {
+	return m.fundID
+}
+
+// ShareClassID ...
+func (m *QuoteLoader) ShareClassID() string {
+	return m.shareClassID
+}
+
+type historicalNav struct {
+	En en `json:"en"`
+}
+
+type en struct {
+	ShareClasses []shareClass `json:"shareClasses"`
+}
+
+type shareClass struct {
+	ID         string     `json:"id"`
 	Ccy        string     `json:"ccy"`
-	Currencies []Currency `json:"currencies"`
+	Currencies []currency `json:"currencies"`
 }
 
-type Currency struct {
-	Id     string `json:"id"`
-	Series Series `json:"series"`
+type currency struct {
+	ID     string `json:"id"`
+	Series series `json:"series"`
 }
 
-type Series struct {
+type series struct {
 	Name     string   `json:"name"`
 	Category []string `json:"category"`
 	Data     []string `json:"data"`
 }
 
-func (m *MorganStanleyQuoteLoader) Name() string {
-	return m.name
-}
-
-func (m *MorganStanleyQuoteLoader) ISIN() string {
-	return m.isin
-}
-
-func (m *MorganStanleyQuoteLoader) FundId() string {
-	return m.fundId
-}
-
-func (m *MorganStanleyQuoteLoader) ShareClassId() string {
-	return m.shareClassId
-}
-
-func (m *MorganStanleyQuoteLoader) LoadQuotes() ([]security.Quote, error) {
-	url := fmt.Sprintf(MorganStanleyUrlTemplate, m.fundId)
+// LoadQuotes ...
+func (m *QuoteLoader) LoadQuotes() ([]security.Quote, error) {
+	url := fmt.Sprintf(morganStanleyURLTemplate, m.fundID)
 
 	res, err := http.Get(url)
 	if err != nil {
@@ -98,14 +104,14 @@ func (m *MorganStanleyQuoteLoader) LoadQuotes() ([]security.Quote, error) {
 		return nil, fmt.Errorf("error reading body: %w", err)
 	}
 
-	var historicalNav HistoricalNav
+	var historicalNav historicalNav
 	err = json.Unmarshal(b, &historicalNav)
 	if err != nil {
 		return nil, fmt.Errorf("error unmarshaling body: %w", err)
 	}
 
-	shareIdx := slices.IndexFunc(historicalNav.En.ShareClasses, func(s ShareClass) bool {
-		return s.Id == m.shareClassId
+	shareIdx := slices.IndexFunc(historicalNav.En.ShareClasses, func(s shareClass) bool {
+		return s.ID == m.shareClassID
 	})
 	if shareIdx == -1 {
 		return nil, nil
@@ -113,8 +119,8 @@ func (m *MorganStanleyQuoteLoader) LoadQuotes() ([]security.Quote, error) {
 
 	shareClass := historicalNav.En.ShareClasses[shareIdx]
 
-	eurIdx := slices.IndexFunc(shareClass.Currencies, func(c Currency) bool {
-		return c.Id == "EUR"
+	eurIdx := slices.IndexFunc(shareClass.Currencies, func(c currency) bool {
+		return c.ID == "EUR"
 	})
 	if eurIdx == -1 {
 		return nil, nil
@@ -138,12 +144,14 @@ func (m *MorganStanleyQuoteLoader) LoadQuotes() ([]security.Quote, error) {
 
 		date, err := time.Parse("01/02/2006", dateString)
 		if err != nil {
-			panic(err)
+			log.Warnf("Error parsing date: %s", err)
+			continue
 		}
 
 		closeQuote, err := strconv.ParseFloat(valueString, 32)
 		if err != nil {
-			panic(err)
+			log.Warnf("Error parsing quote: %s", err)
+			continue
 		}
 
 		quotes = append(quotes, security.Quote{
