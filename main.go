@@ -12,6 +12,7 @@ import (
 	"github.com/charmbracelet/log"
 	"github.com/enrichman/portfolio-perfomance/pkg/security"
 	"github.com/enrichman/portfolio-perfomance/pkg/security/loaders/borsaitaliana"
+	"github.com/enrichman/portfolio-perfomance/pkg/security/loaders/financialtimes"
 	"github.com/enrichman/portfolio-perfomance/pkg/security/loaders/fondidoc"
 	"github.com/enrichman/portfolio-perfomance/pkg/security/loaders/fonte"
 	"github.com/enrichman/portfolio-perfomance/pkg/security/loaders/morganstanley"
@@ -174,6 +175,8 @@ func getQuoteLoader(loader, name, isin string) (security.QuoteLoader, error) {
 	switch loader {
 	case "borsaitaliana":
 		return borsaitaliana.New(name, isin)
+	case "financialtimes":
+		return financialtimes.New(name, isin)
 	case "fonte":
 		return fonte.New(name, isin)
 	case "secondapensione":
