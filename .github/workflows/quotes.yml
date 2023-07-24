@@ -27,7 +27,7 @@ jobs:
         run: go mod verify
 
   vet:
-    name: Vet
+    name: 👨‍⚕️ Vet
     runs-on: ubuntu-latest
     steps:
       - name: ⬇️ Checkout repo
@@ -36,7 +36,7 @@ jobs:
       - name: 🐹 Setup Go
         uses: actions/setup-go@v4
 
-      - name: Vet
+      - name: 👨‍⚕️ Vet
         run: go vet ./...
 
   lint:
@@ -55,7 +55,7 @@ jobs:
           golint ./...
 
   staticcheck:
-    name: Static Check
+    name: 🚧 Static Check
     runs-on: ubuntu-latest
     steps:
       - name: ⬇️ Checkout repo
@@ -64,7 +64,7 @@ jobs:
       - name: 🐹 Setup Go
         uses: actions/setup-go@v4
 
-      - name: staticcheck
+      - name: 🚧 staticcheck
         run: |
           go install honnef.co/go/tools/cmd/staticcheck@latest
           staticcheck ./...
