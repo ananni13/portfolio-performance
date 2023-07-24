@@ -40,6 +40,22 @@ func New(name, isin string) (*MorganStanleyQuoteLoader, error) {
 	}, nil
 }
 
+func (m *MorganStanleyQuoteLoader) Name() string {
+	return m.name
+}
+
+func (m *MorganStanleyQuoteLoader) ISIN() string {
+	return m.isin
+}
+
+func (m *MorganStanleyQuoteLoader) FundId() string {
+	return m.fundId
+}
+
+func (m *MorganStanleyQuoteLoader) ShareClassId() string {
+	return m.shareClassId
+}
+
 type HistoricalNav struct {
 	En En `json:"en"`
 }
@@ -63,22 +79,6 @@ type Series struct {
 	Name     string   `json:"name"`
 	Category []string `json:"category"`
 	Data     []string `json:"data"`
-}
-
-func (m *MorganStanleyQuoteLoader) Name() string {
-	return m.name
-}
-
-func (m *MorganStanleyQuoteLoader) ISIN() string {
-	return m.isin
-}
-
-func (m *MorganStanleyQuoteLoader) FundId() string {
-	return m.fundId
-}
-
-func (m *MorganStanleyQuoteLoader) ShareClassId() string {
-	return m.shareClassId
 }
 
 func (m *MorganStanleyQuoteLoader) LoadQuotes() ([]security.Quote, error) {

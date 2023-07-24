@@ -26,12 +26,12 @@ func New(name, isin string) (*SecondaPensione, error) {
 	}, nil
 }
 
-func (e *SecondaPensione) Name() string {
-	return e.name
+func (s *SecondaPensione) Name() string {
+	return s.name
 }
 
-func (e *SecondaPensione) ISIN() string {
-	return e.isin
+func (s *SecondaPensione) ISIN() string {
+	return s.isin
 }
 
 func (s *SecondaPensione) LoadQuotes() ([]security.Quote, error) {
