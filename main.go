@@ -50,6 +50,41 @@ func main() {
 	wg.Wait()
 }
 
+func loadSecuritiesFromCSV(path string) error {
+	f, err := os.Open(path)
+	if err != nil {
+		return fmt.Errorf("opening file [%s]: %w", path, err)
+	}
+	defer f.Close()
+
+	// read csv values using csv.Reader
+	csvReader := csv.NewReader(f)
+	csvReader.Comment = '#'
+	csvReader.FieldsPerRecord = 3
+	csvReader.Read() // skip header line
+
+	data, err := csvReader.ReadAll()
+	if err != nil {
+		return fmt.Errorf("reading csv: %w", err)
+	}
+
+	for _, line := range data {
+		isin := line[0]
+		name := line[1]
+		loader := line[2]
+
+		quoteLoader, err := getQuoteLoader(loader, name, isin)
+		if err != nil {
+			log.Warnf("Error creating quoteLoader [%s] for ISIN %s (%s): %s", loader, isin, name, err)
+			continue
+		}
+
+		security.Register(quoteLoader)
+	}
+
+	return nil
+}
+
 func loadQuotes(isin string, loader security.QuoteLoader) {
 	start := time.Now().In(time.UTC)
 
@@ -148,41 +183,6 @@ func writeQuotesToFile(filename string, quotes []security.Quote) error {
 
 	if _, err = file.Write(jsonOutput); err != nil {
 		return fmt.Errorf("error writing to file [%s]: %s", filename, err.Error())
-	}
-
-	return nil
-}
-
-func loadSecuritiesFromCSV(path string) error {
-	f, err := os.Open(path)
-	if err != nil {
-		return fmt.Errorf("opening file [%s]: %w", path, err)
-	}
-	defer f.Close()
-
-	// read csv values using csv.Reader
-	csvReader := csv.NewReader(f)
-	csvReader.Comment = '#'
-	csvReader.FieldsPerRecord = 3
-	csvReader.Read() // skip header line
-
-	data, err := csvReader.ReadAll()
-	if err != nil {
-		return fmt.Errorf("reading csv: %w", err)
-	}
-
-	for _, line := range data {
-		isin := line[0]
-		name := line[1]
-		loader := line[2]
-
-		quoteLoader, err := getQuoteLoader(loader, name, isin)
-		if err != nil {
-			log.Warnf("Error creating quoteLoader [%s] for ISIN %s (%s): %s", loader, isin, name, err)
-			continue
-		}
-
-		security.Register(quoteLoader)
 	}
 
 	return nil
