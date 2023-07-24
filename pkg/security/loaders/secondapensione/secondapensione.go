@@ -73,7 +73,10 @@ func (s *QuoteLoader) LoadQuotes() ([]security.Quote, error) {
 		})
 	})
 
-	c.Visit(url)
+	err := c.Visit(url)
+	if err != nil {
+		return nil, fmt.Errorf("error visiting/parsing page")
+	}
 
 	return quotes, nil
 }

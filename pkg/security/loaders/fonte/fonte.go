@@ -6,6 +6,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/charmbracelet/log"
 	"github.com/enrichman/portfolio-performance/pkg/security"
 	"github.com/gocolly/colly/v2"
 )
@@ -90,7 +91,10 @@ func (f *QuoteLoader) LoadQuotes() ([]security.Quote, error) {
 		})
 	})
 
-	c.Visit(url)
+	err := c.Visit(url)
+	if err != nil {
+		return nil, fmt.Errorf("error visiting/parsing page")
+	}
 
 	reverse(years)
 
@@ -101,14 +105,16 @@ func (f *QuoteLoader) LoadQuotes() ([]security.Quote, error) {
 			dateString := fmt.Sprintf("%s %s", y.year, month)
 			tt, err := time.Parse("2006 January", dateString)
 			if err != nil {
-				panic(err)
+				log.Warnf("Error parsing date: %s", err)
+				continue
 			}
 			tt = tt.AddDate(0, 1, -1)
 
 			y.values[i] = strings.ReplaceAll(y.values[i], ",", ".")
 			closeQuote, err := strconv.ParseFloat(y.values[i], 32)
 			if err != nil {
-				panic(err)
+				log.Warnf("Error parsing quote: %s", err)
+				continue
 			}
 
 			quotes = append(quotes, security.Quote{
