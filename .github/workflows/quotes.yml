@@ -84,10 +84,10 @@ jobs:
         uses: actions/setup-go@v4
 
       - name: 🏗 Build
-        run: go build
+        run: go build -o bin/portfolio-performance
 
       - name: 📈 Run
-        run: ./portfolio-performance
+        run: ./bin/portfolio-performance
 
       - name: ⬆️ Push all changes
         uses: stefanzweifel/git-auto-commit-action@v4
