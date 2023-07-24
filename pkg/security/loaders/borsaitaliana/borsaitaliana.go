@@ -12,6 +12,10 @@ import (
 	"github.com/enrichman/portfolio-perfomance/pkg/security"
 )
 
+const (
+	BorsaItalianaUrl = "https://charts.borsaitaliana.it/charts/services/ChartWService.asmx/GetPricesWithVolume"
+)
+
 type BorsaItalianaQuoteLoader struct {
 	name   string
 	isin   string
@@ -21,15 +25,14 @@ type BorsaItalianaQuoteLoader struct {
 func New(name, isin string) (*BorsaItalianaQuoteLoader, error) {
 	isinMarket := strings.Split(isin, ".")
 
-	var market string
-	if len(isinMarket) > 1 {
-		market = isinMarket[1]
+	if len(isinMarket) != 2 {
+		return nil, fmt.Errorf("Wrong ISIN format for BorsaItalianaQuoteLoader: \"%s\" - should be \"ISIN.market\"", isin)
 	}
 
 	return &BorsaItalianaQuoteLoader{
 		name:   name,
 		isin:   isinMarket[0],
-		market: market,
+		market: isinMarket[1],
 	}, nil
 }
 
@@ -80,7 +83,7 @@ func (b *BorsaItalianaQuoteLoader) LoadQuotes() ([]security.Quote, error) {
 	}
 
 	res, err := http.Post(
-		"https://charts.borsaitaliana.it/charts/services/ChartWService.asmx/GetPricesWithVolume",
+		BorsaItalianaUrl,
 		"application/json",
 		bytes.NewBuffer(payloadBytes),
 	)
