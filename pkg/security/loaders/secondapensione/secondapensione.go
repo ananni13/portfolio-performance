@@ -40,11 +40,37 @@ func (s *QuoteLoader) ISIN() string {
 
 // LoadQuotes fetches quotes from SecondaPensione.
 func (s *QuoteLoader) LoadQuotes() ([]security.Quote, error) {
-	c := colly.NewCollector()
-
-	url := fmt.Sprintf(secondaPensioneURLTemplate, s.isin)
+	data, err := fetchData(s.isin)
+	if err != nil {
+		return nil, err
+	}
 
 	quotes := []security.Quote{}
+
+	for _, quote := range data {
+		quotes = append(quotes, security.Quote{
+			Date:  quote.Date,
+			Close: float32(quote.CloseQuote),
+		})
+	}
+
+	return quotes, nil
+}
+
+func parseRowText(values []string) (string, string) {
+	return values[0], values[1]
+}
+
+type parsedData struct {
+	Date       time.Time
+	CloseQuote float64
+}
+
+func fetchData(isin string) ([]parsedData, error) {
+	c := colly.NewCollector()
+	url := fmt.Sprintf(secondaPensioneURLTemplate, isin)
+
+	data := []parsedData{}
 
 	c.OnHTML("#tableVl", func(e *colly.HTMLElement) {
 		e.ForEach("tbody tr", func(i int, e *colly.HTMLElement) {
@@ -66,21 +92,17 @@ func (s *QuoteLoader) LoadQuotes() ([]security.Quote, error) {
 				return
 			}
 
-			quotes = append(quotes, security.Quote{
-				Date:  date,
-				Close: float32(closeQuote),
+			data = append(data, parsedData{
+				Date:       date,
+				CloseQuote: closeQuote,
 			})
 		})
 	})
 
 	err := c.Visit(url)
 	if err != nil {
-		return nil, fmt.Errorf("error visiting/parsing page")
+		return nil, fmt.Errorf("error visiting/parsing page: %w", err)
 	}
 
-	return quotes, nil
-}
-
-func parseRowText(values []string) (string, string) {
-	return values[0], values[1]
+	return data, nil
 }

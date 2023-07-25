@@ -54,7 +54,26 @@ func (f *QuoteLoader) FundID() string {
 
 // LoadQuotes fetches quotes from FondiDoc.
 func (f *QuoteLoader) LoadQuotes() ([]security.Quote, error) {
-	url := fmt.Sprintf(fondiDocURLTemplate, f.fundID)
+	fondiDoc, err := fetchData(f.fundID)
+	if err != nil {
+		return nil, err
+	}
+
+	fundData := fondiDoc[f.fundID].(map[string]interface{})
+
+	quotes := []security.Quote{}
+	for _, quote := range fundData["data"].([]interface{}) {
+		quotes = append(quotes, security.Quote{
+			Date:  time.Unix(int64(quote.([]interface{})[0].(float64))*100, 0),
+			Close: float32(quote.([]interface{})[1].(float64)),
+		})
+	}
+
+	return quotes, nil
+}
+
+func fetchData(fundID string) (map[string]interface{}, error) {
+	url := fmt.Sprintf(fondiDocURLTemplate, fundID)
 
 	res, err := http.Get(url)
 	if err != nil {
@@ -75,15 +94,5 @@ func (f *QuoteLoader) LoadQuotes() ([]security.Quote, error) {
 		return nil, fmt.Errorf("error unmarshaling body: %w", err)
 	}
 
-	fundData := fondiDoc[f.fundID].(map[string]interface{})
-
-	quotes := []security.Quote{}
-	for _, quote := range fundData["data"].([]interface{}) {
-		quotes = append(quotes, security.Quote{
-			Date:  time.Unix(int64(quote.([]interface{})[0].(float64))*100, 0),
-			Close: float32(quote.([]interface{})[1].(float64)),
-		})
-	}
-
-	return quotes, nil
+	return fondiDoc, nil
 }

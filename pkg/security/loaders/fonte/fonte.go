@@ -54,15 +54,49 @@ func (f *QuoteLoader) URLName() string {
 
 // LoadQuotes fetches quotes from FonTe.
 func (f *QuoteLoader) LoadQuotes() ([]security.Quote, error) {
-	c := colly.NewCollector()
-
-	url := fmt.Sprintf(fonTeURLTemplate, f.urlName)
-
-	type yearContent struct {
-		year   string
-		months []time.Month
-		values []string
+	years, err := fetchData(f.urlName)
+	if err != nil {
+		return nil, err
 	}
+
+	quotes := []security.Quote{}
+
+	for _, y := range years {
+		for i, month := range y.months {
+			dateString := fmt.Sprintf("%s %s", y.year, month)
+			tt, err := time.Parse("2006 January", dateString)
+			if err != nil {
+				log.Warnf("Error parsing date: %s", err)
+				continue
+			}
+			tt = tt.AddDate(0, 1, -1)
+
+			y.values[i] = strings.ReplaceAll(y.values[i], ",", ".")
+			closeQuote, err := strconv.ParseFloat(y.values[i], 32)
+			if err != nil {
+				log.Warnf("Error parsing quote: %s", err)
+				continue
+			}
+
+			quotes = append(quotes, security.Quote{
+				Date:  tt,
+				Close: float32(closeQuote),
+			})
+		}
+	}
+
+	return quotes, nil
+}
+
+type yearContent struct {
+	year   string
+	months []time.Month
+	values []string
+}
+
+func fetchData(urlName string) ([]yearContent, error) {
+	c := colly.NewCollector()
+	url := fmt.Sprintf(fonTeURLTemplate, urlName)
 	years := []yearContent{}
 
 	c.OnHTML("article.content-text-page", func(e *colly.HTMLElement) {
@@ -93,38 +127,12 @@ func (f *QuoteLoader) LoadQuotes() ([]security.Quote, error) {
 
 	err := c.Visit(url)
 	if err != nil {
-		return nil, fmt.Errorf("error visiting/parsing page")
+		return nil, fmt.Errorf("error visiting/parsing page: %w", err)
 	}
 
 	reverse(years)
 
-	quotes := []security.Quote{}
-
-	for _, y := range years {
-		for i, month := range y.months {
-			dateString := fmt.Sprintf("%s %s", y.year, month)
-			tt, err := time.Parse("2006 January", dateString)
-			if err != nil {
-				log.Warnf("Error parsing date: %s", err)
-				continue
-			}
-			tt = tt.AddDate(0, 1, -1)
-
-			y.values[i] = strings.ReplaceAll(y.values[i], ",", ".")
-			closeQuote, err := strconv.ParseFloat(y.values[i], 32)
-			if err != nil {
-				log.Warnf("Error parsing quote: %s", err)
-				continue
-			}
-
-			quotes = append(quotes, security.Quote{
-				Date:  tt,
-				Close: float32(closeQuote),
-			})
-		}
-	}
-
-	return quotes, nil
+	return years, nil
 }
 
 func reverse[S ~[]E, E any](s S) {

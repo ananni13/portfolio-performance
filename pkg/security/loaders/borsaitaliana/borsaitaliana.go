@@ -48,8 +48,22 @@ func (b *QuoteLoader) ISIN() string {
 	return b.isin
 }
 
-type data struct {
-	Data [][5]float32 `json:"d"`
+// LoadQuotes fetches quotes from BorsaItaliana.
+func (b *QuoteLoader) LoadQuotes() ([]security.Quote, error) {
+	result, err := fetchData(b.isin, b.market)
+	if err != nil {
+		return nil, err
+	}
+
+	quotes := []security.Quote{}
+	for _, quote := range result.Data {
+		quotes = append(quotes, security.Quote{
+			Date:  time.Unix(int64(quote[0]/1000), 0).In(time.UTC),
+			Close: quote[1],
+		})
+	}
+
+	return quotes, nil
 }
 
 type requestPayload struct {
@@ -67,14 +81,17 @@ type requestPayload struct {
 	Language             string
 }
 
-// LoadQuotes fetches quotes from BorsaItaliana.
-func (b *QuoteLoader) LoadQuotes() ([]security.Quote, error) {
+type responsePayload struct {
+	Data [][5]float32 `json:"d"`
+}
+
+func fetchData(isin, market string) (responsePayload, error) {
 	payload := requestPayload{
 		SampleTime:           "1d",
 		TimeFrame:            "10y",
 		RequestedDataSetType: "ohlc",
 		ChartPriceType:       "price",
-		Key:                  fmt.Sprintf("%s.%s", b.isin, b.market),
+		Key:                  fmt.Sprintf("%s.%s", isin, market),
 		KeyType:              "Topic",
 		KeyType2:             "Topic",
 		Language:             "en-US",
@@ -84,7 +101,7 @@ func (b *QuoteLoader) LoadQuotes() ([]security.Quote, error) {
 		Request requestPayload `json:"request"`
 	}{Request: payload})
 	if err != nil {
-		return nil, fmt.Errorf("error marshaling request body")
+		return responsePayload{}, fmt.Errorf("error marshaling request body: %w", err)
 	}
 
 	res, err := http.Post(
@@ -93,27 +110,19 @@ func (b *QuoteLoader) LoadQuotes() ([]security.Quote, error) {
 		bytes.NewBuffer(payloadBytes),
 	)
 	if err != nil {
-		return nil, fmt.Errorf("error during post request: %w", err)
+		return responsePayload{}, fmt.Errorf("error during post request: %w", err)
 	}
 
 	bodyBytes, err := io.ReadAll(res.Body)
 	if err != nil {
-		return nil, fmt.Errorf("error reading body: %w", err)
+		return responsePayload{}, fmt.Errorf("error reading body: %w", err)
 	}
 
-	var result data
+	var result responsePayload
 	err = json.Unmarshal(bodyBytes, &result)
 	if err != nil {
-		return nil, fmt.Errorf("error unmarshaling body: %w", err)
+		return responsePayload{}, fmt.Errorf("error unmarshaling body: %w", err)
 	}
 
-	quotes := []security.Quote{}
-	for _, quote := range result.Data {
-		quotes = append(quotes, security.Quote{
-			Date:  time.Unix(int64(quote[0]/1000), 0).In(time.UTC),
-			Close: quote[1],
-		})
-	}
-
-	return quotes, nil
+	return result, nil
 }
