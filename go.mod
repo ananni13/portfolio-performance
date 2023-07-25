@@ -17,6 +17,8 @@ require (
 	github.com/gobwas/glob v0.2.3 // indirect
 	github.com/golang/groupcache v0.0.0-20200121045136-8c9f03a8e57e // indirect
 	github.com/golang/protobuf v1.4.2 // indirect
+	github.com/h2non/gock v1.2.0 // indirect
+	github.com/h2non/parth v0.0.0-20190131123155-b4df798d6542 // indirect
 	github.com/kennygrant/sanitize v1.2.4 // indirect
 	github.com/saintfish/chardet v0.0.0-20120816061221-3af4cd4741ca // indirect
 	github.com/temoto/robotstxt v1.1.1 // indirect
@@ -36,6 +38,5 @@ require (
 	github.com/muesli/reflow v0.3.0 // indirect
 	github.com/muesli/termenv v0.15.1 // indirect
 	github.com/rivo/uniseg v0.4.4 // indirect
-	golang.org/x/exp v0.0.0-20230713183714-613f0c0eb8a1
 	golang.org/x/sys v0.6.0 // indirect
 )
