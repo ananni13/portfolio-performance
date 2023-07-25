@@ -71,7 +71,7 @@ jobs:
         run: staticcheck ./...
 
   test:
-    name: Test
+    name: 🛠️ Test
     runs-on: ubuntu-latest
     steps:
       - name: ⬇️ Checkout repo
@@ -80,7 +80,7 @@ jobs:
       - name: 🐹 Setup Go
         uses: actions/setup-go@v4
 
-      - name: Test
+      - name: 🛠️ Test
         run: go test ./...
 
   update-quotes:
