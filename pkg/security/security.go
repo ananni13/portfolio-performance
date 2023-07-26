@@ -1,6 +1,7 @@
 package security
 
 import (
+	"bytes"
 	"encoding/csv"
 	"encoding/json"
 	"errors"
@@ -15,19 +16,16 @@ import (
 	"golang.org/x/exp/maps"
 )
 
-// LoadSecuritiesFromCSV loads a securities csv file and returns a map with every security and corresponding QuoteLoader
-func LoadSecuritiesFromCSV(path string) ([]quotes.QuoteLoader, error) {
-	f, err := os.Open(path)
-	if err != nil {
-		return nil, fmt.Errorf("opening file [%s]: %w", path, err)
-	}
-	defer f.Close()
+// SecuritiesCSV CSV file loaded as bytes
+var SecuritiesCSV []byte
 
+// LoadSecuritiesFromCSV loads all securities from the securities.csv file and returns a slice of corresponding QuoteLoader
+func LoadSecuritiesFromCSV() ([]quotes.QuoteLoader, error) {
 	// read csv values using csv.Reader
-	csvReader := csv.NewReader(f)
+	csvReader := csv.NewReader(bytes.NewReader(SecuritiesCSV))
 	csvReader.Comment = '#'
 	csvReader.FieldsPerRecord = 3
-	_, err = csvReader.Read() // skip header line
+	_, err := csvReader.Read() // skip header line
 	if err != nil {
 		return nil, fmt.Errorf("reading csv: %w", err)
 	}
@@ -62,7 +60,7 @@ func LoadSecuritiesFromCSV(path string) ([]quotes.QuoteLoader, error) {
 	return maps.Values(securities), nil
 }
 
-// UpdateQuotes fetches and updates quotes.
+// UpdateQuotes fetches and updates quotes from the QuoteLoader
 func UpdateQuotes(loader quotes.QuoteLoader) {
 	start := time.Now().In(time.UTC)
 
