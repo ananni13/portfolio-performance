@@ -42,7 +42,7 @@ func LoadSecuritiesFromCSV() ([]quotes.QuoteLoader, error) {
 		name := line[1]
 		loader := line[2]
 
-		quoteLoader, err := loaders.GetQuoteLoader(loader, name, isin)
+		quoteLoader, err := loaders.New(loader, name, isin)
 		if err != nil {
 			log.Errorf("Error creating quoteLoader [%s] for ISIN %s (%s): %s", loader, isin, name, err)
 			continue

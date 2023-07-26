@@ -12,7 +12,7 @@ import (
 	"github.com/enrichman/portfolio-performance/pkg/security/quotes"
 )
 
-func GetQuoteLoader(loader, name, isin string) (quotes.QuoteLoader, error) {
+func New(loader, name, isin string) (quotes.QuoteLoader, error) {
 	switch loader {
 	case "borsaitaliana":
 		return borsaitaliana.New(name, isin)
