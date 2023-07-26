@@ -9,7 +9,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/enrichman/portfolio-performance/pkg/security"
+	"github.com/enrichman/portfolio-performance/pkg/security/quotes"
 )
 
 const (
@@ -49,21 +49,21 @@ func (b *QuoteLoader) ISIN() string {
 }
 
 // LoadQuotes fetches quotes from BorsaItaliana.
-func (b *QuoteLoader) LoadQuotes() ([]security.Quote, error) {
+func (b *QuoteLoader) LoadQuotes() ([]quotes.Quote, error) {
 	result, err := fetchData(b.isin, b.market)
 	if err != nil {
 		return nil, err
 	}
 
-	quotes := []security.Quote{}
+	quotesData := []quotes.Quote{}
 	for _, quote := range result.Data {
-		quotes = append(quotes, security.Quote{
+		quotesData = append(quotesData, quotes.Quote{
 			Date:  time.Unix(int64(quote[0]/1000), 0).In(time.UTC),
 			Close: quote[1],
 		})
 	}
 
-	return quotes, nil
+	return quotesData, nil
 }
 
 type requestPayload struct {

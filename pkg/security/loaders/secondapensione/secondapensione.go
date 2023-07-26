@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/charmbracelet/log"
-	"github.com/enrichman/portfolio-performance/pkg/security"
+	"github.com/enrichman/portfolio-performance/pkg/security/quotes"
 	"github.com/gocolly/colly/v2"
 )
 
@@ -39,22 +39,22 @@ func (s *QuoteLoader) ISIN() string {
 }
 
 // LoadQuotes fetches quotes from SecondaPensione.
-func (s *QuoteLoader) LoadQuotes() ([]security.Quote, error) {
+func (s *QuoteLoader) LoadQuotes() ([]quotes.Quote, error) {
 	data, err := fetchData(s.isin)
 	if err != nil {
 		return nil, err
 	}
 
-	quotes := []security.Quote{}
+	quotesData := []quotes.Quote{}
 
 	for _, quote := range data {
-		quotes = append(quotes, security.Quote{
+		quotesData = append(quotesData, quotes.Quote{
 			Date:  quote.Date,
 			Close: float32(quote.CloseQuote),
 		})
 	}
 
-	return quotes, nil
+	return quotesData, nil
 }
 
 func parseRowText(values []string) (string, string) {

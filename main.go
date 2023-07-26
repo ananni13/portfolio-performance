@@ -1,23 +1,12 @@
 package main
 
 import (
-	"encoding/csv"
-	"encoding/json"
-	"errors"
-	"fmt"
 	"os"
 	"strings"
 	"sync"
-	"time"
 
 	"github.com/charmbracelet/log"
 	"github.com/enrichman/portfolio-performance/pkg/security"
-	"github.com/enrichman/portfolio-performance/pkg/security/loaders/borsaitaliana"
-	"github.com/enrichman/portfolio-performance/pkg/security/loaders/financialtimes"
-	"github.com/enrichman/portfolio-performance/pkg/security/loaders/fondidoc"
-	"github.com/enrichman/portfolio-performance/pkg/security/loaders/fonte"
-	"github.com/enrichman/portfolio-performance/pkg/security/loaders/morganstanley"
-	"github.com/enrichman/portfolio-performance/pkg/security/loaders/secondapensione"
 )
 
 func main() {
@@ -25,186 +14,26 @@ func main() {
 		log.SetLevel(log.DebugLevel)
 	}
 
-	err := loadSecuritiesFromCSV("securities.csv")
+	securities, err := security.LoadSecuritiesFromCSV("securities.csv")
 	if err != nil {
 		log.Errorf("loading securities from CSV: %s", err)
 		os.Exit(1)
 	}
 
-	log.Infof("loaded %d securities", len(security.Securities))
+	log.Infof("loaded %d securities", len(securities))
 
 	var wg sync.WaitGroup
 
-	for isin, loader := range security.Securities {
+	for _, loader := range securities {
 		wg.Add(1)
 
-		isin := isin
 		loader := loader
 
 		go func() {
 			defer wg.Done()
-			loadQuotes(isin, loader)
+			security.UpdateQuotes(loader)
 		}()
 	}
 
 	wg.Wait()
-}
-
-func loadSecuritiesFromCSV(path string) error {
-	f, err := os.Open(path)
-	if err != nil {
-		return fmt.Errorf("opening file [%s]: %w", path, err)
-	}
-	defer f.Close()
-
-	// read csv values using csv.Reader
-	csvReader := csv.NewReader(f)
-	csvReader.Comment = '#'
-	csvReader.FieldsPerRecord = 3
-	_, err = csvReader.Read() // skip header line
-	if err != nil {
-		return fmt.Errorf("reading csv: %w", err)
-	}
-
-	data, err := csvReader.ReadAll()
-	if err != nil {
-		return fmt.Errorf("reading csv: %w", err)
-	}
-
-	for _, line := range data {
-		isin := line[0]
-		name := line[1]
-		loader := line[2]
-
-		quoteLoader, err := getQuoteLoader(loader, name, isin)
-		if err != nil {
-			log.Warnf("Error creating quoteLoader [%s] for ISIN %s (%s): %s", loader, isin, name, err)
-			continue
-		}
-
-		security.Register(quoteLoader)
-	}
-
-	return nil
-}
-
-func loadQuotes(isin string, loader security.QuoteLoader) {
-	start := time.Now().In(time.UTC)
-
-	log.Infof("[%s] loading quotes for '%s'", loader.ISIN(), loader.Name())
-
-	newQuotes, err := loader.LoadQuotes()
-	if err != nil {
-		log.Errorf("error loading quotes: %s", err)
-		return
-	}
-	if len(newQuotes) == 0 {
-		log.Warn("no quotes found")
-		return
-	}
-
-	log.Debug("new quotes loaded",
-		"from", newQuotes[0].Date,
-		"to", newQuotes[len(newQuotes)-1].Date,
-	)
-
-	filename := fmt.Sprintf("out/json/%s.json", isin)
-	log.Debugf("loading OLD quotes from '%s'", filename)
-
-	oldQuotes, err := loadQuotesFromFile(filename)
-	if err != nil {
-		log.Errorf("error loading quotes: %s", err.Error())
-		return
-	}
-
-	if len(oldQuotes) == 0 {
-		log.Warn("no OLD quotes found")
-	} else {
-		log.Debug("found OLD quotes",
-			"from", oldQuotes[0].Date,
-			"to", oldQuotes[len(oldQuotes)-1].Date,
-		)
-	}
-
-	mergedQuotes := security.Merge(oldQuotes, newQuotes)
-	log.Debug("merged quotes",
-		"from", mergedQuotes[0].Date,
-		"to", mergedQuotes[len(mergedQuotes)-1].Date,
-	)
-
-	err = writeQuotesToFile(filename, mergedQuotes)
-	if err != nil {
-		log.Errorf("error writing quotes: %s", err.Error())
-		return
-	}
-
-	addedQuotes := len(mergedQuotes) - len(oldQuotes)
-	if addedQuotes == 0 {
-		log.Infof("[%s] no new quotes added", loader.ISIN())
-	} else {
-		log.Infof(
-			"[%s] new quotes added [%d] - old [%d] - new [%d]",
-			loader.ISIN(), addedQuotes, len(oldQuotes), len(newQuotes),
-		)
-	}
-
-	log.Infof("[%s] quotes loaded in %s", loader.ISIN(), time.Since(start))
-}
-
-func loadQuotesFromFile(filename string) ([]security.Quote, error) {
-	oldQuotesByte, err := os.ReadFile(filename)
-	if errors.Is(err, os.ErrNotExist) {
-		return nil, nil
-	}
-	if err != nil {
-		return nil, fmt.Errorf("error reading file [%s]: %s", filename, err.Error())
-	}
-
-	var oldQuotes []security.Quote
-	err = json.Unmarshal(oldQuotesByte, &oldQuotes)
-	if err != nil {
-		return nil, fmt.Errorf("error unmarshaling file [%s]: %s", filename, err.Error())
-	}
-
-	return oldQuotes, nil
-}
-
-func writeQuotesToFile(filename string, quotes []security.Quote) error {
-	jsonOutput, err := json.MarshalIndent(quotes, "", "  ")
-	if err != nil {
-		return fmt.Errorf("error marshaling file [%s]: %s", filename, err.Error())
-	}
-
-	file, err := os.OpenFile(filename, os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0644)
-	if err != nil {
-		return fmt.Errorf("error opening file [%s]: %s", filename, err.Error())
-	}
-	err = file.Truncate(0)
-	if err != nil {
-		return fmt.Errorf("error truncating file [%s]: %s", filename, err.Error())
-	}
-
-	if _, err = file.Write(jsonOutput); err != nil {
-		return fmt.Errorf("error writing to file [%s]: %s", filename, err.Error())
-	}
-
-	return nil
-}
-
-func getQuoteLoader(loader, name, isin string) (security.QuoteLoader, error) {
-	switch loader {
-	case "borsaitaliana":
-		return borsaitaliana.New(name, isin)
-	case "financialtimes":
-		return financialtimes.New(name, isin)
-	case "fonte":
-		return fonte.New(name, isin)
-	case "secondapensione":
-		return secondapensione.New(name, isin)
-	case "fondidoc":
-		return fondidoc.New(name, isin)
-	case "morganstanley":
-		return morganstanley.New(name, isin)
-	}
-	return nil, fmt.Errorf("quoteLoader [%s] not found", loader)
 }

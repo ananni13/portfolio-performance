@@ -10,7 +10,7 @@ import (
 	"time"
 
 	"github.com/charmbracelet/log"
-	"github.com/enrichman/portfolio-performance/pkg/security"
+	"github.com/enrichman/portfolio-performance/pkg/security/quotes"
 	"golang.org/x/exp/slices"
 )
 
@@ -56,10 +56,14 @@ func (f *QuoteLoader) Symbol() string {
 }
 
 // LoadQuotes fetches quotes from FinancialTimes.
-func (f *QuoteLoader) LoadQuotes() ([]security.Quote, error) {
+func (f *QuoteLoader) LoadQuotes() ([]quotes.Quote, error) {
 	result, err := fetchData(f.symbol)
 	if err != nil {
 		return nil, err
+	}
+
+	if len(result.Elements) == 0 {
+		return nil, nil
 	}
 
 	series := result.Elements[0].ComponentSeries
@@ -80,7 +84,7 @@ func (f *QuoteLoader) LoadQuotes() ([]security.Quote, error) {
 		return nil, nil
 	}
 
-	quotes := []security.Quote{}
+	quotesData := []quotes.Quote{}
 
 	for idx, dateString := range dates {
 		value := values[idx]
@@ -91,13 +95,13 @@ func (f *QuoteLoader) LoadQuotes() ([]security.Quote, error) {
 			continue
 		}
 
-		quotes = append(quotes, security.Quote{
+		quotesData = append(quotesData, quotes.Quote{
 			Date:  date,
 			Close: value,
 		})
 	}
 
-	return quotes, nil
+	return quotesData, nil
 }
 
 type requestPayload struct {

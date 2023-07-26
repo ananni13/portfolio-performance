@@ -10,7 +10,7 @@ import (
 	"time"
 
 	"github.com/charmbracelet/log"
-	"github.com/enrichman/portfolio-performance/pkg/security"
+	"github.com/enrichman/portfolio-performance/pkg/security/quotes"
 	"golang.org/x/exp/slices"
 )
 
@@ -63,7 +63,7 @@ func (m *QuoteLoader) ShareClassID() string {
 }
 
 // LoadQuotes fetches quotes from MorganStanley.
-func (m *QuoteLoader) LoadQuotes() ([]security.Quote, error) {
+func (m *QuoteLoader) LoadQuotes() ([]quotes.Quote, error) {
 	historicalNav, err := fetchData(m.fundID)
 	if err != nil {
 		return nil, err
@@ -92,7 +92,7 @@ func (m *QuoteLoader) LoadQuotes() ([]security.Quote, error) {
 		return nil, nil
 	}
 
-	quotes := []security.Quote{}
+	quotesData := []quotes.Quote{}
 
 	for idx, dateString := range currency.Series.Category {
 		valueString := currency.Series.Data[idx]
@@ -113,13 +113,13 @@ func (m *QuoteLoader) LoadQuotes() ([]security.Quote, error) {
 			continue
 		}
 
-		quotes = append(quotes, security.Quote{
+		quotesData = append(quotesData, quotes.Quote{
 			Date:  date,
 			Close: float32(closeQuote),
 		})
 	}
 
-	return quotes, nil
+	return quotesData, nil
 }
 
 type responsePayload struct {

@@ -8,7 +8,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/enrichman/portfolio-performance/pkg/security"
+	"github.com/enrichman/portfolio-performance/pkg/security/quotes"
 )
 
 const (
@@ -53,7 +53,7 @@ func (f *QuoteLoader) FundID() string {
 }
 
 // LoadQuotes fetches quotes from FondiDoc.
-func (f *QuoteLoader) LoadQuotes() ([]security.Quote, error) {
+func (f *QuoteLoader) LoadQuotes() ([]quotes.Quote, error) {
 	fondiDoc, err := fetchData(f.fundID)
 	if err != nil {
 		return nil, err
@@ -61,15 +61,15 @@ func (f *QuoteLoader) LoadQuotes() ([]security.Quote, error) {
 
 	fundData := fondiDoc[f.fundID].(map[string]interface{})
 
-	quotes := []security.Quote{}
+	quotesData := []quotes.Quote{}
 	for _, quote := range fundData["data"].([]interface{}) {
-		quotes = append(quotes, security.Quote{
+		quotesData = append(quotesData, quotes.Quote{
 			Date:  time.Unix(int64(quote.([]interface{})[0].(float64))*100, 0),
 			Close: float32(quote.([]interface{})[1].(float64)),
 		})
 	}
 
-	return quotes, nil
+	return quotesData, nil
 }
 
 func fetchData(fundID string) (map[string]interface{}, error) {

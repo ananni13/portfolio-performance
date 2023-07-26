@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/charmbracelet/log"
-	"github.com/enrichman/portfolio-performance/pkg/security"
+	"github.com/enrichman/portfolio-performance/pkg/security/quotes"
 	"github.com/gocolly/colly/v2"
 )
 
@@ -53,13 +53,13 @@ func (f *QuoteLoader) URLName() string {
 }
 
 // LoadQuotes fetches quotes from FonTe.
-func (f *QuoteLoader) LoadQuotes() ([]security.Quote, error) {
+func (f *QuoteLoader) LoadQuotes() ([]quotes.Quote, error) {
 	years, err := fetchData(f.urlName)
 	if err != nil {
 		return nil, err
 	}
 
-	quotes := []security.Quote{}
+	quotesData := []quotes.Quote{}
 
 	for _, y := range years {
 		for i, month := range y.months {
@@ -78,14 +78,14 @@ func (f *QuoteLoader) LoadQuotes() ([]security.Quote, error) {
 				continue
 			}
 
-			quotes = append(quotes, security.Quote{
+			quotesData = append(quotesData, quotes.Quote{
 				Date:  tt,
 				Close: float32(closeQuote),
 			})
 		}
 	}
 
-	return quotes, nil
+	return quotesData, nil
 }
 
 type yearContent struct {
