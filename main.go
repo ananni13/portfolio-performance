@@ -18,9 +18,7 @@ func main() {
 		log.SetLevel(log.DebugLevel)
 	}
 
-	security.SecuritiesCSV = securities
-
-	loaders, err := security.LoadSecuritiesFromCSV()
+	loaders, err := security.LoadSecuritiesFromCSV(securities)
 	if err != nil {
 		log.Errorf("loading securities from CSV: %s", err)
 		os.Exit(1)

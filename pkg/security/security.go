@@ -16,13 +16,10 @@ import (
 	"golang.org/x/exp/maps"
 )
 
-// SecuritiesCSV CSV file loaded as bytes
-var SecuritiesCSV []byte
-
 // LoadSecuritiesFromCSV loads all securities from the securities.csv file and returns a slice of corresponding QuoteLoader
-func LoadSecuritiesFromCSV() ([]quotes.QuoteLoader, error) {
+func LoadSecuritiesFromCSV(csvBytes []byte) ([]quotes.QuoteLoader, error) {
 	// read csv values using csv.Reader
-	csvReader := csv.NewReader(bytes.NewReader(SecuritiesCSV))
+	csvReader := csv.NewReader(bytes.NewReader(csvBytes))
 	csvReader.Comment = '#'
 	csvReader.FieldsPerRecord = 3
 	_, err := csvReader.Read() // skip header line
