@@ -92,14 +92,7 @@ jobs:
     name: 📈 Update Quotes
     runs-on: ubuntu-latest
     needs: [verify, vet, lint, staticcheck, test]
-    if: |
-      always() &&
-      github.ref == 'refs/heads/main' &&
-      (needs.verify.result == 'success' || needs.verify.result == 'skipped') &&
-      (needs.vet.result == 'success' || needs.vet.result == 'skipped') &&
-      (needs.lint.result == 'success' || needs.lint.result == 'skipped') &&
-      (needs.staticcheck.result == 'success' || needs.staticcheck.result == 'skipped') &&
-      (needs.test.result == 'success' || needs.test.result == 'skipped')
+    if: always() && !failure() && !cancelled() && github.ref == 'refs/heads/main'
     steps:
       - name: ⬇️ Checkout repo
         uses: actions/checkout@v3
