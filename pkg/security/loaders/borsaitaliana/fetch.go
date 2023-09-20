@@ -34,7 +34,7 @@ type responsePayload struct {
 func fetchData(isin, market string) (responsePayload, error) {
 	payload := requestPayload{
 		SampleTime:           "1d",
-		TimeFrame:            "10y",
+		TimeFrame:            "5y",
 		RequestedDataSetType: "ohlc",
 		ChartPriceType:       "price",
 		Key:                  fmt.Sprintf("%s.%s", isin, market),
