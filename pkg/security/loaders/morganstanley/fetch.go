@@ -8,7 +8,7 @@ import (
 )
 
 const (
-	morganStanleyURLTemplate = "https://www.morganstanley.com/pub/content/dam/im/json/imwebdata/im/data/product/OF/%s/chart/historicalNav.json"
+	morganStanleyURLTemplate = "https://www.morganstanley.com/im/json/imwebdata/data/product/OF/%s/chart/historicalNav.json"
 )
 
 type responsePayload struct {
