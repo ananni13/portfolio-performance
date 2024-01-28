@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/enrichman/portfolio-performance/pkg/security/loaders/borsaitaliana"
+	"github.com/enrichman/portfolio-performance/pkg/security/loaders/corepension"
 	"github.com/enrichman/portfolio-performance/pkg/security/loaders/financialtimes"
 	"github.com/enrichman/portfolio-performance/pkg/security/loaders/fondidoc"
 	"github.com/enrichman/portfolio-performance/pkg/security/loaders/fonte"
@@ -22,6 +23,8 @@ func New(loader, name, isin string) (quotes.QuoteLoader, error) {
 		return fonte.New(name, isin)
 	case "secondapensione":
 		return secondapensione.New(name, isin)
+	case "corepension":
+		return corepension.New(name, isin)
 	case "fondidoc":
 		return fondidoc.New(name, isin)
 	case "morganstanley":

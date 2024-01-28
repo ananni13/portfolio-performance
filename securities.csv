@@ -23,6 +23,12 @@ isin,name,loader
 "QS0000003561","SecondaPensione Espansione ESG","secondapensione"
 "QS0000003562","SecondaPensione Bilanciata ESG","secondapensione"
 
+"QS0000057906","CorePension Garantito ESG","corepension"
+"GS0000061412","CorePension Obbligazionario Misto ESG","corepension"
+"QS0000061411","CorePension Bilanciato ESG","corepension"
+"QS0000061410","CorePension Azionario","corepension"
+"QS0000061309","CorePension Azionario Plus","corepension"
+
 "IT0001083424.SAZINTE","Eurizon Azioni Internazionali ESG","fondidoc"
 
 "LU0119620416.1209.A","Global Brands Fund A","morganstanley"
