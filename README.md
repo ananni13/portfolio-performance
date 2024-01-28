@@ -20,6 +20,7 @@ These are the currently available loaders:
 - [FonTe](./pkg/security/loaders/fonte/fonte.go)
 - [Morgan Stanley](./pkg/security/loaders/morganstanley/morganstanley.go)
 - [SecondaPensione](./pkg/security/loaders/secondapensione/secondapensione.go)
+- [CorePension](./pkg/security/loaders/corepension/corepension.go)
 
 #### Borsa Italiana
 
