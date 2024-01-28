@@ -95,6 +95,12 @@ For the `FUNDID`: right click on a blank spot in the page, select **View Page So
 "QS0000003561","SecondaPensione Espansione ESG","secondapensione"
 ```
 
+#### CorePension
+
+```csv
+"QS0000061309","CorePension Azionario Plus ESG","corepension"
+```
+
 ## How To add a quote to Portfolio Performance
 
 Add an empty instrument and add the JSON historical quotes.
