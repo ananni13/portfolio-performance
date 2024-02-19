@@ -53,9 +53,9 @@ jobs:
         uses: actions/setup-go@v5
 
       - name: 🔬 Lint
-        uses: golangci/golangci-lint-action@v3
+        uses: golangci/golangci-lint-action@v4
         with:
-          version: v1.53
+          version: v1.56
 
   staticcheck:
     name: 🚧 Static Check
