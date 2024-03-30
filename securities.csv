@@ -6,10 +6,6 @@ isin,name,loader
 "AT0000A324S8.MOT","Austria Tf 2,9% Fb33 Eur","borsaitaliana"
 "DE0001102358.MOT","Bund Tf 1.5% Mg24 Eur","borsaitaliana"
 "DE0001102366.MOT","Bund Tf 1% Ag24 Eur","borsaitaliana"
-"IT0005521171.MOT","Eni Sdg Linked Tf 4,3% Fb28 Eur","borsaitaliana"
-"XS2110112971.TLX","Citigroup Social Bond Tf 3,28% Dc25 Eur","borsaitaliana"
-"XS2533094400.TLX","Mediobanca Tf 3,4% Ot26 Eur","borsaitaliana"
-"XS2587298204.MOT","Eib Tf 2,75% Lg28 Eur","borsaitaliana"
 "IT0005559817.MOT","Bot Zc Ag24 A Eur","borsaitaliana"
 
 "FP-FonTe-Conservativo.garantito","Fondo Pensione Fon.Te. - Comparto Conservativo","fonte"
@@ -28,8 +24,6 @@ isin,name,loader
 "QS0000061411","CorePension Bilanciato ESG","corepension"
 "QS0000061410","CorePension Azionario ESG","corepension"
 "QS0000061309","CorePension Azionario Plus ESG","corepension"
-
-"IT0001083424.SAZINTE","Eurizon Azioni Internazionali ESG","fondidoc"
 
 "LU0119620416.1209.A","Global Brands Fund A","morganstanley"
 "LU0335216932.1209.Ae","Global Brands Fund AH (EUR)","morganstanley"
