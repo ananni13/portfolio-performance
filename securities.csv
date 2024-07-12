@@ -13,6 +13,12 @@ isin,name,loader
 "FP-FonTe-Crescita.crescita","Fondo Pensione Fon.Te. - Comparto Crescita","fonte"
 "FP-FonTe-Dinamico.dinamico","Fondo Pensione Fon.Te. - Comparto Dinamico","fonte"
 
+"FP-Cometa-Monetario-Plus.monetario-plus","Fondo Pensione Cometa - Comparto Monetario Plus","cometa"
+"FP-Cometa-TFR-Silente.tfr-silente","Fondo Pensione Cometa - Comparto TFR Silente","cometa"
+"FP-Cometa-Sicurezza-2020.sicurezza-2020","Fondo Pensione Cometa - Comparto Sicurezza 2020","cometa"
+"FP-Cometa-Reddito.reddito","Fondo Pensione Cometa - Comparto Reddito","cometa"
+"FP-Cometa-Crescita.crescita","Fondo Pensione Cometa - Comparto Crescita","cometa"
+
 "QS0000003560","SecondaPensione Prudente ESG","secondapensione"
 "QS0000003564","SecondaPensione Sviluppo ESG","secondapensione"
 "QS0000013033","SecondaPensione Garantita ESG","secondapensione"
