@@ -68,11 +68,10 @@ jobs:
       - name: 🐹 Setup Go
         uses: actions/setup-go@v5
 
-      - name: 📥 Install staticcheck
-        run: go install honnef.co/go/tools/cmd/staticcheck@latest
-
       - name: 🚧 staticcheck
-        run: staticcheck ./...
+        uses: dominikh/staticcheck-action@v1
+        with:
+          version: "latest"
 
   test:
     name: 🛠️ Test
