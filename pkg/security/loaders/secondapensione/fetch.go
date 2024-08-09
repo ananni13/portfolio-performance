@@ -1,64 +1,62 @@
 package secondapensione
 
 import (
+	"bytes"
+	"encoding/json"
 	"fmt"
-	"strconv"
-	"time"
-
-	"github.com/charmbracelet/log"
-	"github.com/gocolly/colly/v2"
+	"io"
+	"net/http"
 )
 
 const (
-	secondaPensioneURLTemplate = "https://www.secondapensione.it/ezjscore/call/ezjscamundibuzz::sfForwardFront::paramsList=service=ProxyProductSheetV3Front&routeId=_en-GB_879_%s_tab_3"
+	secondaPensioneURLTemplate = "https://www.secondapensione.it/product-services/fdr/share/v1/full/%s"
 )
 
-type parsedData struct {
-	Date       time.Time
-	CloseQuote float64
+type requestPayload struct {
+	Fields []string `json:"fields"`
 }
 
-func fetchData(isin string) ([]parsedData, error) {
-	c := colly.NewCollector()
-	url := fmt.Sprintf(secondaPensioneURLTemplate, isin)
+type responsePayload []responseItem
 
-	data := []parsedData{}
+type responseItem struct {
+	ID         string       `json:"_id"`
+	NavHistory []parsedData `json:"navHistory"`
+}
 
-	c.OnHTML("#tableVl", func(e *colly.HTMLElement) {
-		e.ForEach("tbody tr", func(i int, e *colly.HTMLElement) {
-			dateString, valueString := parseRowText(e.ChildTexts("td"))
+type parsedData struct {
+	Timestamp string  `json:"date"`
+	Value     float64 `json:"value"`
+}
 
-			if dateString == "" || valueString == "" {
-				return
-			}
-
-			date, err := time.Parse("02/01/2006", dateString)
-			if err != nil {
-				log.Warnf("Error parsing date: %s", err)
-				return
-			}
-
-			closeQuote, err := strconv.ParseFloat(valueString, 32)
-			if err != nil {
-				log.Warnf("Error parsing quote: %s", err)
-				return
-			}
-
-			data = append(data, parsedData{
-				Date:       date,
-				CloseQuote: closeQuote,
-			})
-		})
-	})
-
-	err := c.Visit(url)
-	if err != nil {
-		return nil, fmt.Errorf("error visiting/parsing page: %w", err)
+func fetchData(isin string) (responsePayload, error) {
+	payload := requestPayload{
+		Fields: []string{"navHistory"},
 	}
 
-	return data, nil
-}
+	payloadBytes, err := json.Marshal(payload)
+	if err != nil {
+		return responsePayload{}, fmt.Errorf("error marshaling request body: %w", err)
+	}
 
-func parseRowText(values []string) (string, string) {
-	return values[0], values[1]
+	res, err := http.Post(
+		fmt.Sprintf(secondaPensioneURLTemplate, isin),
+		"application/json",
+		bytes.NewBuffer(payloadBytes),
+	)
+	if err != nil {
+		return responsePayload{}, fmt.Errorf("error during post request: %w", err)
+	}
+
+	bodyBytes, err := io.ReadAll(res.Body)
+	if err != nil {
+		return responsePayload{}, fmt.Errorf("error reading body: %w", err)
+	}
+
+	var result responsePayload
+	err = json.Unmarshal(bodyBytes, &result)
+	if err != nil {
+		return responsePayload{}, fmt.Errorf("error unmarshaling body: %w", err)
+	}
+
+	return result, nil
 }
