@@ -9,7 +9,7 @@ import (
 )
 
 const (
-	secondaPensioneURLTemplate = "https://www.corepension.it/product-services/fdr/share/v1/full/%s"
+	corePensionURLTemplate = "https://www.corepension.it/product-services/fdr/share/v1/full/%s"
 )
 
 type requestPayload struct {
@@ -39,7 +39,7 @@ func fetchData(isin string) (responsePayload, error) {
 	}
 
 	res, err := http.Post(
-		fmt.Sprintf(secondaPensioneURLTemplate, isin),
+		fmt.Sprintf(corePensionURLTemplate, isin),
 		"application/json",
 		bytes.NewBuffer(payloadBytes),
 	)
