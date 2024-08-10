@@ -1,10 +1,10 @@
 package corepension
 
 import (
-	"log"
 	"strconv"
 	"time"
 
+	"github.com/charmbracelet/log"
 	"github.com/enrichman/portfolio-performance/pkg/security/quotes"
 )
 
@@ -44,7 +44,8 @@ func (s *QuoteLoader) LoadQuotes() ([]quotes.Quote, error) {
 	for _, quote := range data[0].NavHistory {
 		timestamp, err := strconv.ParseInt(quote.Timestamp, 10, 0)
 		if err != nil {
-			log.Fatalf("failed to parse int: %v", err)
+			log.Errorf("failed to parse int: %v", err)
+			continue
 		}
 
 		quotesData = append(quotesData, quotes.Quote{
