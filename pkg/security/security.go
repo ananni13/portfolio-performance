@@ -98,7 +98,7 @@ func UpdateQuotes(loader quotes.QuoteLoader) {
 		)
 	}
 
-	mergedQuotes := merge(oldQuotes, newQuotes)
+	mergedQuotes := merge(oldQuotes, newQuotes, loader.ISIN())
 	log.Debugf("[%s] merged quotes from %s to %s",
 		loader.ISIN(),
 		mergedQuotes[0].Date,
@@ -124,7 +124,7 @@ func UpdateQuotes(loader quotes.QuoteLoader) {
 	log.Infof("[%s] quotes loaded in %s", loader.ISIN(), time.Since(start))
 }
 
-func merge(quotes1 []quotes.Quote, quotes2 []quotes.Quote) []quotes.Quote {
+func merge(quotes1 []quotes.Quote, quotes2 []quotes.Quote, isin string) []quotes.Quote {
 	quotesMap := map[time.Time]quotes.Quote{}
 
 	for _, q := range quotes1 {
@@ -137,8 +137,8 @@ func merge(quotes1 []quotes.Quote, quotes2 []quotes.Quote) []quotes.Quote {
 
 		if oldQuote, found := quotesMap[q.Date]; found {
 			if oldQuote.Close != q.Close {
-				log.Warnf("quote for date '%v' already exists with different value [old: %v - new: %v]",
-					q.Date, oldQuote.Close, q.Close,
+				log.Warnf("[%s] quote for date '%v' already exists with different value [old: %v - new: %v]",
+					isin, q.Date, oldQuote.Close, q.Close,
 				)
 			}
 		}
