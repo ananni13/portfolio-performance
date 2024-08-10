@@ -35,7 +35,7 @@ func fetchData(isin string) (responsePayload, error) {
 
 	payloadBytes, err := json.Marshal(payload)
 	if err != nil {
-		return responsePayload{}, fmt.Errorf("error marshaling request body: %w", err)
+		return nil, fmt.Errorf("error marshaling request body: %w", err)
 	}
 
 	res, err := http.Post(
@@ -44,18 +44,18 @@ func fetchData(isin string) (responsePayload, error) {
 		bytes.NewBuffer(payloadBytes),
 	)
 	if err != nil {
-		return responsePayload{}, fmt.Errorf("error during post request: %w", err)
+		return nil, fmt.Errorf("error during post request: %w", err)
 	}
 
 	bodyBytes, err := io.ReadAll(res.Body)
 	if err != nil {
-		return responsePayload{}, fmt.Errorf("error reading body: %w", err)
+		return nil, fmt.Errorf("error reading body: %w", err)
 	}
 
 	var result responsePayload
 	err = json.Unmarshal(bodyBytes, &result)
 	if err != nil {
-		return responsePayload{}, fmt.Errorf("error unmarshaling body: %w", err)
+		return nil, fmt.Errorf("error unmarshaling body: %w", err)
 	}
 
 	return result, nil
