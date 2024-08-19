@@ -1,6 +1,6 @@
 module github.com/enrichman/portfolio-performance
 
-go 1.22
+go 1.23
 
 require (
 	github.com/charmbracelet/log v0.2.1
