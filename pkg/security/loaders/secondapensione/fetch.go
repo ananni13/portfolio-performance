@@ -6,10 +6,12 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+
+	"github.com/charmbracelet/log"
 )
 
 const (
-	secondaPensioneURLTemplate = "https://www.secondapensione.it/product-services/fdr/share/v1/full/%s"
+	secondaPensioneURLTemplate = "https://www.secondapensione.it/product-services/fdr/share/v2/full/%s"
 )
 
 type requestPayload struct {
@@ -24,8 +26,8 @@ type responseItem struct {
 }
 
 type parsedData struct {
-	Timestamp string  `json:"date"`
-	Value     float64 `json:"value"`
+	Date  string  `json:"date"`
+	Value float64 `json:"value"`
 }
 
 func fetchData(isin string) (responsePayload, error) {
@@ -38,11 +40,21 @@ func fetchData(isin string) (responsePayload, error) {
 		return nil, fmt.Errorf("error marshaling request body: %w", err)
 	}
 
-	res, err := http.Post(
-		fmt.Sprintf(secondaPensioneURLTemplate, isin),
-		"application/json",
-		bytes.NewBuffer(payloadBytes),
-	)
+	req, err := http.NewRequest("POST", fmt.Sprintf(secondaPensioneURLTemplate, isin), bytes.NewBuffer(payloadBytes))
+	if err != nil {
+		return nil, fmt.Errorf("error creating request: %w", err)
+	}
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Accept", "application/json")
+	req.Header.Set("Host", "www.secondapensione.it")
+	req.Header.Set("Origin", "https://www.secondapensione.it")
+	req.Header.Set("Sec-Fetch-Dest", "empty")
+	req.Header.Set("Sec-Fetch-Mode", "cors")
+	req.Header.Set("Sec-Fetch-Site", "same-origin")
+	req.Header.Set("User-Agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36")
+
+	client := &http.Client{}
+	res, err := client.Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("error during post request: %w", err)
 	}
@@ -55,6 +67,11 @@ func fetchData(isin string) (responsePayload, error) {
 	var result responsePayload
 	err = json.Unmarshal(bodyBytes, &result)
 	if err != nil {
+		log.Info(string(bodyBytes))
+		log.Infof("error decoding response: %v", err)
+		if e, ok := err.(*json.SyntaxError); ok {
+			log.Infof("syntax error at byte offset %d", e.Offset)
+		}
 		return nil, fmt.Errorf("error unmarshaling body: %w", err)
 	}
 

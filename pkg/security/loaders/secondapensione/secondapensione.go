@@ -1,7 +1,6 @@
 package secondapensione
 
 import (
-	"strconv"
 	"time"
 
 	"github.com/charmbracelet/log"
@@ -42,14 +41,14 @@ func (s *QuoteLoader) LoadQuotes() ([]quotes.Quote, error) {
 	quotesData := []quotes.Quote{}
 
 	for _, quote := range data[0].NavHistory {
-		timestamp, err := strconv.ParseInt(quote.Timestamp, 10, 0)
+		date, err := time.Parse("2006-01-02", quote.Date)
 		if err != nil {
-			log.Errorf("failed to parse int: %v", err)
+			log.Errorf("failed to parse date: %v", err)
 			continue
 		}
 
 		quotesData = append(quotesData, quotes.Quote{
-			Date:  time.UnixMilli(timestamp),
+			Date:  date,
 			Close: float32(quote.Value),
 		})
 	}
