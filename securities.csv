@@ -4,9 +4,6 @@ isin,name,loader
 "IT0005497000.MOT","Btp Italia Gn30 Eur","borsaitaliana"
 "IT0005494239.MOT","Btp Tf 2,5% Dc32 Eur","borsaitaliana"
 "AT0000A324S8.MOT","Austria Tf 2,9% Fb33 Eur","borsaitaliana"
-"DE0001102358.MOT","Bund Tf 1.5% Mg24 Eur","borsaitaliana"
-"DE0001102366.MOT","Bund Tf 1% Ag24 Eur","borsaitaliana"
-"IT0005559817.MOT","Bot Zc Ag24 A Eur","borsaitaliana"
 
 "FP-FonTe-Conservativo.garantito","Fondo Pensione Fon.Te. - Comparto Conservativo","fonte"
 "FP-FonTe-Sviluppo.bilanciato","Fondo Pensione Fon.Te. - Comparto Sviluppo","fonte"
