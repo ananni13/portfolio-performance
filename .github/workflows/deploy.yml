@@ -53,9 +53,9 @@ jobs:
         uses: actions/setup-go@v5
 
       - name: 🔬 Lint
-        uses: golangci/golangci-lint-action@v6
+        uses: golangci/golangci-lint-action@v8
         with:
-          version: v1.60.1
+          version: v2.1
 
   staticcheck:
     name: 🚧 Static Check
@@ -134,7 +134,7 @@ jobs:
           FOLDER: out
 
       - name: 📄 Setup Pages
-        uses: actions/configure-pages@v4
+        uses: actions/configure-pages@v5
 
       - name: 📤 Upload artifact
         uses: actions/upload-pages-artifact@v3
