@@ -19,10 +19,10 @@ jobs:
     if: github.event_name == 'push'
     steps:
       - name: ⬇️ Checkout repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: 🐹 Setup Go
-        uses: actions/setup-go@v5
+        uses: actions/setup-go@v6
 
       - name: 🔎 Verify dependencies
         run: go mod verify
@@ -33,10 +33,10 @@ jobs:
     if: github.event_name == 'push'
     steps:
       - name: ⬇️ Checkout repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: 🐹 Setup Go
-        uses: actions/setup-go@v5
+        uses: actions/setup-go@v6
 
       - name: 👨‍⚕️ Vet
         run: go vet ./...
@@ -47,15 +47,15 @@ jobs:
     if: github.event_name == 'push'
     steps:
       - name: ⬇️ Checkout repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: 🐹 Setup Go
-        uses: actions/setup-go@v5
+        uses: actions/setup-go@v6
 
       - name: 🔬 Lint
         uses: golangci/golangci-lint-action@v8
         with:
-          version: v2.1
+          version: v2.5
 
   staticcheck:
     name: 🚧 Static Check
@@ -63,10 +63,10 @@ jobs:
     if: github.event_name == 'push'
     steps:
       - name: ⬇️ Checkout repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: 🐹 Setup Go
-        uses: actions/setup-go@v5
+        uses: actions/setup-go@v6
 
       - name: 🚧 staticcheck
         uses: dominikh/staticcheck-action@v1
@@ -79,10 +79,10 @@ jobs:
     if: github.event_name == 'push'
     steps:
       - name: ⬇️ Checkout repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: 🐹 Setup Go
-        uses: actions/setup-go@v5
+        uses: actions/setup-go@v6
 
       - name: 🛠️ Test
         run: go test ./...
@@ -94,10 +94,10 @@ jobs:
     if: always() && !failure() && !cancelled() && github.ref == 'refs/heads/main'
     steps:
       - name: ⬇️ Checkout repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: 🐹 Setup Go
-        uses: actions/setup-go@v5
+        uses: actions/setup-go@v6
 
       - name: 🏗 Build
         run: go build -o bin/portfolio-performance
@@ -106,7 +106,7 @@ jobs:
         run: ./bin/portfolio-performance
 
       - name: ⬆️ Push all changes
-        uses: stefanzweifel/git-auto-commit-action@v5
+        uses: stefanzweifel/git-auto-commit-action@v7
         with:
           branch: main
           add_options: "--all"
@@ -123,7 +123,7 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - name: ⬇️ Checkout repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           # This is needed to pick up any commit made in the "update-quotes" job
           ref: main
@@ -137,7 +137,7 @@ jobs:
         uses: actions/configure-pages@v5
 
       - name: 📤 Upload artifact
-        uses: actions/upload-pages-artifact@v3
+        uses: actions/upload-pages-artifact@v4
         with:
           path: "out"
 
